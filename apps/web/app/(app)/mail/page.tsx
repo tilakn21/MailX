@@ -8,7 +8,6 @@ import { LoadingContent } from "@/components/LoadingContent";
 import type { ThreadsQuery } from "@/app/api/google/threads/validation";
 import type { ThreadsResponse } from "@/app/api/google/threads/controller";
 import { refetchEmailListAtom } from "@/store/email";
-import { BetaBanner } from "@/app/(app)/mail/BetaBanner";
 import { ClientOnly } from "@/components/ClientOnly";
 import { PermissionsCheck } from "@/app/(app)/PermissionsCheck";
 
@@ -89,9 +88,6 @@ export default function Mail(props: {
   return (
     <>
       <PermissionsCheck />
-      <ClientOnly>
-        <BetaBanner />
-      </ClientOnly>
       <LoadingContent loading={isLoading && !data} error={error}>
         {allThreads && (
           <List

@@ -7,15 +7,15 @@ export function CTAButtons() {
   const posthog = usePostHog();
   return (
     <Button
-      size="2xl"
+      size="xl"
       className="mt-10"
       link={{ href: "/login" }}
       onClick={() => {
         posthog.capture("Clicked Get Started");
       }}
-      color="blue"
+      color="white"
     >
-      Get Started for Free
+      Get Started with MailX
     </Button>
   );
 }

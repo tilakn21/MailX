@@ -1,12 +1,10 @@
+'use client'
 import Link from "next/link";
 import Image from "next/image";
 import { CTAButtons } from "@/app/(landing)/home/CTAButtons";
-import { SquaresPattern } from "@/app/(landing)/home/SquaresPattern";
 import { cn } from "@/utils";
-import { LogoCloud } from "@/app/(landing)/home/LogoCloud";
 import { env } from "@/env";
 import { HeroAB } from "@/app/(landing)/home/HeroAB";
-import HeroVideoDialog from "@/components/HeroVideoDialog";
 
 export function HeroText(props: {
   children: React.ReactNode;
@@ -16,14 +14,14 @@ export function HeroText(props: {
 
   return (
     <h1
-      className={cn("font-cal text-4xl text-gray-900 sm:text-6xl", className)}
+      className={cn("font-[600] mb-5 text-6xl sm:text-7xl lg:text-7xl tracking-tight bg-gradient-to-b from-white via to-[#636363] text-transparent bg-clip-text leading-[1.15] font-sans", className)}
       {...rest}
     />
   );
 }
 
 export function HeroSubtitle(props: { children: React.ReactNode }) {
-  return <p className="mt-6 text-lg leading-8 text-gray-600" {...props} />;
+  return <p className=" text-sm sm:text-sm text-gray-400 max-w-lg font-[300] font-sans" {...props} />;
 }
 
 export function HeroHome() {
@@ -34,39 +32,81 @@ export function HeroHome() {
 export function Hero(props: {
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
-  image?: string;
 }) {
   return (
-    <div className="relative pt-14">
-      <SquaresPattern />
-      <div className="pt-24 sm:pb-12 sm:pt-32">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          {/* <HeroTag /> */}
-          <div className="mb-10">
-            <ProductHuntBadge />
-          </div>
+    <div className="relative pt-24 overflow-hidden bg-black min-h-screen">
+      <div className="absolute inset-0">
+        {Array.from({ length: 50 }).map((_, i) => (
+          <div
+            key={i}
+            className="absolute h-[3px] w-[3px] rounded-full bg-white"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              opacity: Math.random() * 0.3 + 0.1,
+              animation: `float ${Math.random() * 10 + 5}s infinite ${Math.random() * 5}s`
+            }}
+          />
+        ))}
+      </div>
 
-          <div className="mx-auto max-w-xl text-center">
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(${Math.random() * 20}px, ${Math.random() * 20}px); }
+        }
+        @keyframes shine {
+          from {
+            transform: translateX(-100%);
+          }
+          to {
+            transform: translateX(100%);
+          }
+        }
+      `}</style>
+      <div className="pt-10 sm:pt-16 pb-24 relative">
+        <div 
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[140%] h-[800px] z-0"
+          style={{
+            background: 'radial-gradient(circle at 50% 100%, rgba(249, 115, 22, 0.7) 0%, rgba(249, 115, 22, 0.2) 25%, transparent 60%)'
+          }}
+        />
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
+          <div className="mx-auto max-w-5xl flex flex-col justify-center items-center text-center">
             <HeroText>
-              {props.title || "Stop wasting half your day in Gmail"}
+              {props.title || (
+                <>
+                  Transform your email experience with MailX's intelligence
+                </>
+              )}
             </HeroText>
             <HeroSubtitle>
               {props.subtitle ||
-                "Automate your email with AI, bulk unsubscribe from newsletters, and block cold emails. Open-source."}
+                "Our AI-powered virtual assistant conquers your inbox in minutes, not hours. Wave goodbye to email chaos—start your Mail X journey today! "}
             </HeroSubtitle>
             <CTAButtons />
           </div>
-
-          <LogoCloud />
-
-          <div className="relative mt-16 flow-root sm:mt-24">
-            <HeroVideoDialog
-              className="block"
-              animationStyle="top-in-bottom-out"
-              videoSrc=""
-              thumbnailSrc={props.image || "/images/home/bulk-unsubscriber.png"}
-              thumbnailAlt="Bulk Unsubscriber Screenshot"
-            />
+          
+          <div className="mt-4 flex justify-center relative mb-24 pt-10">
+            <div className="relative w-[90%] max-w-[1400px] aspect-[16/7.5] rounded-xl overflow-hidden shadow-lg z-10 p-[2px] bg-gradient-to-r from-transparent via-orange-500/50 to-transparent">
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white to-transparent animate-shine" />
+              <div className="relative w-full h-full rounded-xl overflow-hidden bg-black/80">
+                <Image 
+                  src="/images/inbox-final.png"
+                  alt="MailX Demo" 
+                  fill 
+                  className="object-cover brightness-90 z-20" 
+                  priority
+                />
+                <div 
+                  className="absolute inset-0 z-10"
+                  style={{
+                    background: 'linear-gradient(180deg, rgba(249, 115, 22, 0.4) 0%, rgba(249, 115, 22, 0.1) 100%)',
+                    mixBlendMode: 'overlay'
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -74,31 +114,29 @@ export function Hero(props: {
   );
 }
 
-// function HeroTag() {
-//   return (
-//     <div className="mb-8 flex justify-center bg-white">
-//       <div className="relative flex items-center gap-x-4 rounded-full px-4 py-1 text-sm leading-6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
-//         <a
-//           href="/product-hunt"
-//           className="flex items-center gap-x-1 font-semibold text-blue-600"
-//         >
-//           <span className="absolute inset-0" aria-hidden="true" />
-//           We are live on Product Hunt!
-//           <ChevronRightIcon
-//             className="-mr-2 h-5 w-5 text-gray-400"
-//             aria-hidden="true"
-//           />
-//         </a>
-//       </div>
-//     </div>
-//   );
-// }
+// Add the shine animation
+const styles = `
+@keyframes shine {
+  0% {
+    transform: translateX(-200%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(200%);
+    opacity: 0;
+  }
+}
 
-function ProductHuntBadge() {
-  return (
-    <div className="flex flex-col items-center justify-center gap-2 sm:flex-row">
-     
+.animate-shine {
+  animation: shine 8s ease-in-out infinite;
+}
+`;
 
-    </div>
-  );
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = styles;
+  document.head.appendChild(styleSheet);
 }

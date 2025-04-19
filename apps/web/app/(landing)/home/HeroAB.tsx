@@ -38,9 +38,9 @@ export function HeroAB() {
   const isFlagEnabled = useHeroVariantEnabled();
 
   useEffect(() => {
-    if (variant && copy[variant]) {
-      setTitle(copy[variant].title);
-      setSubtitle(copy[variant].subtitle);
+    if (variant && variant in copy) {
+      setTitle(copy[variant as keyof typeof copy].title);
+      setSubtitle(copy[variant as keyof typeof copy].subtitle);
     }
     setIsHydrated(true);
   }, [variant]);

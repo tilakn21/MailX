@@ -2,7 +2,7 @@ import { CTAButtons } from "@/app/(landing)/home/CTAButtons";
 
 export function CTA() {
   return (
-    <div className="relative -z-10 mt-12 px-6 lg:px-8">
+    <div className="relative -z-10 mt-12 px-6 lg:px-8 pb-[4rem]">
       {/* <div
         className="absolute inset-x-0 top-1/2 -z-10 flex -translate-y-1/2 transform-gpu justify-center overflow-hidden blur-3xl sm:bottom-0 sm:right-[calc(50%-6rem)] sm:top-auto sm:translate-y-0 sm:transform-gpu sm:justify-end"
         aria-hidden="true"
@@ -19,14 +19,14 @@ export function CTA() {
         <h2 className="font-cal text-3xl text-gray-900 sm:text-4xl">
           Boost your productivity.
           <br />
-          Start using Inbox Zero today.
+          Start using MailX today.
         </h2>
         <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-gray-600">
-          Inbox Zero uses AI to help you empty your inbox daily. What previously
-          took hours, now takes minutes. Inbox Zero is your virtual assistant
+          MailX uses AI to help you empty your inbox daily. What previously
+          took hours, now takes minutes. MailX is your virtual assistant
           for emails.
         </p>
-        <CTAButtons />
+        <CTAButtons/>
       </div>
       {/* <div
         className="absolute left-1/2 right-0 top-full -z-10 hidden -translate-y-1/2 transform-gpu overflow-hidden blur-3xl sm:block"

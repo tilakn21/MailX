@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionDescription, TypographyH3 } from "@/components/Typography";
 import { Button } from "@/components/ui/button";
-import { SquaresPattern } from "@/app/(landing)/home/SquaresPattern";
 import { Header } from "@/app/(landing)/home/Header";
-import { Footer } from "@/app/(landing)/home/Footer";
 import { CTA } from "@/app/(landing)/home/CTA";
 import { HeroSubtitle, HeroText } from "@/app/(landing)/home/Hero";
 import { CardBasic } from "@/components/ui/card";
@@ -28,7 +26,6 @@ export default async function OSSFriendsPage() {
   return (
     <>
       <Header />
-      <SquaresPattern />
 
       <div className="mx-auto mt-40 max-w-6xl pb-10">
         <div className="text-center">
@@ -73,7 +70,6 @@ export default async function OSSFriendsPage() {
       </div>
 
       <CTA />
-      <Footer />
     </>
   );
 }

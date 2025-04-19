@@ -47,7 +47,7 @@ export default async function AuthenticationPage(props: {
             <AlertBasic
               variant="destructive"
               title="Error logging in"
-              description={`There was an error logging in.`}
+              description={`There was an error logging in. Please try log in again. If this error persists please contact support at ${env.NEXT_PUBLIC_SUPPORT_EMAIL}`}
             />
             <Suspense>
               <AutoLogOut loggedIn={!!session?.user.email} />
