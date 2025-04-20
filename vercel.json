@@ -1,5 +1,0 @@
-{
-  "buildCommand": "cd ../.. && turbo run build --filter={apps/web}...",
-  "installCommand": "pnpm install",
-  "ignoreCommand": ""
-}
