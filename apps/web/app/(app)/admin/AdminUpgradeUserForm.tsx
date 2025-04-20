@@ -17,6 +17,7 @@ import { handleActionResult } from "@/utils/server-action";
 export const AdminUpgradeUserForm = () => {
   const {
     register,
+    handleSubmit,
     formState: { errors, isSubmitting },
     getValues,
   } = useForm<ChangePremiumStatusOptions>({
@@ -40,7 +41,7 @@ export const AdminUpgradeUserForm = () => {
   );
 
   return (
-    <form className="max-w-sm space-y-4">
+    <form className="max-w-sm space-y-4" onSubmit={handleSubmit(onSubmit)}>
       <Input
         type="email"
         name="email"
@@ -112,17 +113,19 @@ export const AdminUpgradeUserForm = () => {
       />
       <div className="space-x-2">
         <Button
-          type="button"
+          type="submit"
           loading={isSubmitting}
           onClick={() => {
-            onSubmit({
+            // Set upgrade to true before submitting
+            const formData = {
               email: getValues("email"),
               lemonSqueezyCustomerId: getValues("lemonSqueezyCustomerId"),
               emailAccountsAccess: getValues("emailAccountsAccess"),
               period: getValues("period"),
               count: getValues("count"),
               upgrade: true,
-            });
+            };
+            handleSubmit((data) => onSubmit({ ...data, upgrade: true }))();
           }}
         >
           Upgrade
@@ -132,12 +135,8 @@ export const AdminUpgradeUserForm = () => {
           variant="destructive"
           loading={isSubmitting}
           onClick={() => {
-            onSubmit({
-              email: getValues("email"),
-              period: getValues("period"),
-              count: getValues("count"),
-              upgrade: false,
-            });
+            // Set upgrade to false before submitting
+            handleSubmit((data) => onSubmit({ ...data, upgrade: false }))();
           }}
         >
           Downgrade

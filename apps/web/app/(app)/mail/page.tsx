@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, use } from "react";
+import { useCallback, useEffect, use, Suspense, lazy } from "react";
 import useSWRInfinite from "swr/infinite";
 import { useSetAtom } from "jotai";
 import { List } from "@/components/email-list/EmailList";
@@ -9,13 +9,22 @@ import type { ThreadsQuery } from "@/app/api/google/threads/validation";
 import type { ThreadsResponse } from "@/app/api/google/threads/controller";
 import { refetchEmailListAtom } from "@/store/email";
 import { ClientOnly } from "@/components/ClientOnly";
-import { PermissionsCheck } from "@/app/(app)/PermissionsCheck";
+
+// Lazy load permission check to improve initial load time
+const PermissionsCheck = lazy(() =>
+  import("@/app/(app)/PermissionsCheck").then((mod) => ({
+    default: mod.PermissionsCheck,
+  })),
+);
 
 export default function Mail(props: {
   searchParams: Promise<{ type?: string; labelId?: string }>;
 }) {
   const searchParams = use(props.searchParams);
   const query: ThreadsQuery = {};
+
+  // Set a smaller initial page size to improve first load time
+  const initialPageSize = 20;
 
   // Handle different query params
   if (searchParams.type === "label" && searchParams.labelId) {
@@ -30,10 +39,19 @@ export default function Mail(props: {
   ) => {
     if (previousPageData && !previousPageData.nextPageToken) return null;
     const queryParams = new URLSearchParams(query as Record<string, string>);
+
+    // Set a smaller limit for the first page to improve initial load time
+    if (pageIndex === 0) {
+      queryParams.set("limit", initialPageSize.toString());
+    } else {
+      queryParams.set("limit", "30"); // Subsequent pages can load more
+    }
+
     // Append nextPageToken for subsequent pages
     if (pageIndex > 0 && previousPageData?.nextPageToken) {
       queryParams.set("nextPageToken", previousPageData.nextPageToken);
     }
+
     return `/api/google/threads?${queryParams.toString()}`;
   };
 
@@ -42,6 +60,10 @@ export default function Mail(props: {
       keepPreviousData: true,
       dedupingInterval: 1_000,
       revalidateOnFocus: false,
+      revalidateIfStale: false,
+      revalidateOnMount: true,
+      suspense: false,
+      errorRetryCount: 2,
     });
 
   const allThreads = data ? data.flatMap((page) => page.threads) : [];
@@ -87,7 +109,10 @@ export default function Mail(props: {
 
   return (
     <>
-      <PermissionsCheck />
+      <Suspense fallback={null}>
+        <PermissionsCheck />
+      </Suspense>
+
       <LoadingContent loading={isLoading && !data} error={error}>
         {allThreads && (
           <List

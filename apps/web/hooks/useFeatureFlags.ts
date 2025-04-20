@@ -22,10 +22,13 @@ export function useHeroVariantEnabled() {
   return true;
 }
 
-export type PricingVariant = "control" | "basic-business" | "business-basic";
+export type ExtraFeaturesVariant =
+  | "control"
+  | "basic-business"
+  | "business-basic";
 
-export function usePricingVariant() {
-  // Since we're removing pricing, this won't matter much but return the best option
+export function useExtraFeaturesVariant() {
+  // Since we're removing ExtraFeatures, this won't matter much but return the best option
   return "business-basic";
 }
 

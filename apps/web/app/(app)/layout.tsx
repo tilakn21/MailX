@@ -10,6 +10,8 @@ import { auth } from "@/app/api/auth/[...nextauth]/auth";
 import { PostHogIdentify } from "@/providers/PostHogProvider";
 import { CommandK } from "@/components/CommandK";
 import { AppProviders } from "@/providers/AppProviders";
+import { NavigationProvider } from "@/providers/NavigationProvider";
+import { NavigationIndicator } from "@/components/NavigationIndicator";
 import { AssessUser } from "@/app/(app)/assess";
 import { LastLogin } from "@/app/(app)/last-login";
 import { SentryIdentify } from "@/app/(app)/sentry-identify";
@@ -44,25 +46,28 @@ export default async function AppLayout({
 
   return (
     <AppProviders>
-      <SideNavWithTopNav defaultOpen={!isClosed}>
-        <ErrorMessages />
-        {children}
-      </SideNavWithTopNav>
-      <EmailViewer />
-      <ErrorBoundary extra={{ component: "AppLayout" }}>
-        <PostHogIdentify />
-        <TokenCheck />
-        <CommandK />
-        <QueueInitializer />
-        <AssessUser />
-        <SentryIdentify email={session.user.email} />
-        <Suspense>
-          <LastLogin email={session.user.email} />
-        </Suspense>
-        <Suspense>
-          <CrispWithNoSSR email={session.user.email} />
-        </Suspense>
-      </ErrorBoundary>
+      <NavigationProvider>
+        <NavigationIndicator />
+        <SideNavWithTopNav defaultOpen={!isClosed}>
+          <ErrorMessages />
+          {children}
+        </SideNavWithTopNav>
+        <EmailViewer />
+        <ErrorBoundary extra={{ component: "AppLayout" }}>
+          <PostHogIdentify />
+          <TokenCheck />
+          <CommandK />
+          <QueueInitializer />
+          <AssessUser />
+          <SentryIdentify email={session.user.email} />
+          <Suspense>
+            <LastLogin email={session.user.email} />
+          </Suspense>
+          <Suspense>
+            <CrispWithNoSSR email={session.user.email} />
+          </Suspense>
+        </ErrorBoundary>
+      </NavigationProvider>
     </AppProviders>
   );
 }

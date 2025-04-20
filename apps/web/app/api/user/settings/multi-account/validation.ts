@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const saveMultiAccountPremiumBody = z.object({
+export const saveMultiAccountextraBody = z.object({
   emailAddresses: z
     .array(
       z.object({
@@ -9,6 +9,6 @@ export const saveMultiAccountPremiumBody = z.object({
     )
     .optional(),
 });
-export type SaveMultiAccountPremiumBody = z.infer<
-  typeof saveMultiAccountPremiumBody
+export type SaveMultiAccountextraBody = z.infer<
+  typeof saveMultiAccountextraBody
 >;

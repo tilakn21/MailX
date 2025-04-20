@@ -38,7 +38,7 @@ export function BulkUnsubscribeMobile({
 
 export function BulkUnsubscribeRowMobile({
   item,
-  refetchPremium,
+  refetchextra,
   mutate,
   hasUnsubscribeAccess,
   onOpenNewsletter,
@@ -60,7 +60,7 @@ export function BulkUnsubscribeRowMobile({
       item,
       hasUnsubscribeAccess,
       mutate,
-      refetchPremium,
+      refetchextra,
       posthog,
     },
   );

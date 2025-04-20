@@ -3,10 +3,10 @@
 import { BotIcon, CoinsIcon, CpuIcon } from "lucide-react";
 import { formatStat } from "@/utils/stats";
 import { StatsCards } from "@/components/StatsCards";
-import { usePremium } from "@/components/PremiumAlert";
+import { useExtra } from "@/components/ExtraAlert";
 import { LoadingContent } from "@/components/LoadingContent";
 import { env } from "@/env";
-import { isPremium } from "@/utils/premium";
+import { isExtra } from "@/utils/extra-features";
 
 export function Usage(props: {
   usage?: {
@@ -14,7 +14,7 @@ export function Usage(props: {
     openaiTokensUsed: number;
   } | null;
 }) {
-  const { data, isLoading, error } = usePremium();
+  const { data, isLoading, error } = useExtra();
 
   return (
     <LoadingContent loading={isLoading} error={error}>
@@ -22,10 +22,10 @@ export function Usage(props: {
         stats={[
           {
             name: "Unsubscribe Credits",
-            value: isPremium(data?.premium?.lemonSqueezyRenewsAt || null)
+            value: isExtra(data?.extra?.lemonSqueezyRenewsAt || null)
               ? "Unlimited"
               : formatStat(
-                  data?.premium?.unsubscribeCredits ??
+                  data?.extra?.unsubscribeCredits ??
                     env.NEXT_PUBLIC_FREE_UNSUBSCRIBE_CREDITS,
                 ),
             subvalue: "credits",

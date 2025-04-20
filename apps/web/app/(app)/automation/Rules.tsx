@@ -36,7 +36,7 @@ import { Toggle } from "@/components/Toggle";
 import { conditionsToString } from "@/utils/condition";
 import { Badge } from "@/components/Badge";
 import { getActionColor } from "@/components/PlanBadge";
-import { PremiumAlertWithData } from "@/components/PremiumAlert";
+import { ExtraAlertWithData } from "@/components/ExtraAlert";
 import { toastError, toastSuccess } from "@/components/Toast";
 import { isActionError } from "@/utils/error";
 import { Tooltip } from "@/components/Tooltip";
@@ -53,7 +53,7 @@ export function Rules() {
 
   return (
     <div>
-      <PremiumAlertWithData className="my-2" />
+      <ExtraAlertWithData className="my-2" />
 
       <Card>
         <LoadingContent loading={isLoading} error={error}>

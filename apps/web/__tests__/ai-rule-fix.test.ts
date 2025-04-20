@@ -127,15 +127,15 @@ describe.runIf(isAiTest)("aiRuleFix", () => {
 
   test("should fix rule when email should have matched but didn't", async () => {
     const correctRule = {
-      instructions: "Match emails requesting pricing information",
+      instructions: "Match emails requesting ExtraFeatures information",
     };
 
     const priceRequestEmail = getEmail({
-      subject: "Pricing Question",
+      subject: "ExtraFeatures Question",
       content: stripIndent(`
         Hi there,
 
-        Could you please send me information about your enterprise pricing?
+        Could you please send me information about your enterprise ExtraFeatures?
         We're looking to implement your solution for our team of 50 people.
 
         Best regards,
@@ -155,9 +155,9 @@ describe.runIf(isAiTest)("aiRuleFix", () => {
     expect(result).toBeDefined();
     expect(result.ruleToFix).toBe("expected_rule");
     expect(result.fixedInstructions).toContain("pric");
-    // The fixed rule should be more inclusive of various pricing inquiries
+    // The fixed rule should be more inclusive of various ExtraFeatures inquiries
     expect(result.fixedInstructions.toLowerCase()).toMatch(
-      /(price|pricing|cost|quote).*(request|inquiry|information)/i,
+      /(price|ExtraFeatures|cost|quote).*(request|inquiry|information)/i,
     );
   });
 });

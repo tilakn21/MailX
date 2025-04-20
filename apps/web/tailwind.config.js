@@ -30,10 +30,26 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: 0 },
         },
+        "progress-bar": {
+          "0%": { width: "0%", opacity: "0.5" },
+          "50%": { width: "40%", opacity: "0.7" },
+          "100%": { width: "100%", opacity: "0.9" },
+        },
+        "fade-in": {
+          "0%": { opacity: 0 },
+          "100%": { opacity: 1 },
+        },
+        "fade-out": {
+          "0%": { opacity: 1 },
+          "100%": { opacity: 0 },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "progress-bar": "progress-bar 0.8s ease-in-out forwards",
+        "fade-in": "fade-in 0.2s ease-in-out",
+        "fade-out": "fade-out 0.2s ease-in-out",
       },
       fontFamily: {
         cal: ["var(--font-cal)", ...fontFamily.sans],

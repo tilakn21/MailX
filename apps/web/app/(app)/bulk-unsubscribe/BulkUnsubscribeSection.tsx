@@ -19,13 +19,13 @@ import { getDateRangeParams } from "@/app/(app)/stats/params";
 import { NewsletterModal } from "@/app/(app)/stats/NewsletterModal";
 import { useEmailsToIncludeFilter } from "@/app/(app)/stats/EmailsToIncludeFilter";
 import { DetailedStatsFilter } from "@/app/(app)/stats/DetailedStatsFilter";
-import { usePremium } from "@/components/PremiumAlert";
+import { useExtra } from "@/components/ExtraAlert";
 import {
   useNewsletterFilter,
   useBulkUnsubscribeShortcuts,
 } from "@/app/(app)/bulk-unsubscribe/hooks";
 import { useStatLoader } from "@/providers/StatLoaderProvider";
-import { usePremiumModal } from "@/app/(app)/premium/PremiumModal";
+import { useExtraModal } from "@/components/ExtraModal";
 import { useLabels } from "@/hooks/useLabels";
 import {
   BulkUnsubscribeMobile,
@@ -83,7 +83,7 @@ export function BulkUnsubscribeSection({
     keepPreviousData: true,
   });
 
-  const { hasUnsubscribeAccess, mutate: refetchPremium } = usePremium();
+  const { hasUnsubscribeAccess, mutate: refetchextra } = useExtra();
 
   const { expanded, extra } = useExpanded();
   const [openedNewsletter, setOpenedNewsletter] = React.useState<Newsletter>();
@@ -102,7 +102,7 @@ export function BulkUnsubscribeSection({
     selectedRow,
     onOpenNewsletter,
     setSelectedRow,
-    refetchPremium,
+    refetchextra,
     hasUnsubscribeAccess,
     mutate,
   });
@@ -113,7 +113,7 @@ export function BulkUnsubscribeSection({
 
   const { userLabels } = useLabels();
 
-  const { PremiumModal, openModal } = usePremiumModal();
+  const { ExtraModal, openModal } = useExtraModal();
 
   const RowComponent = isMobile
     ? BulkUnsubscribeRowMobile
@@ -151,8 +151,8 @@ export function BulkUnsubscribeSection({
         onSelectRow={() => setSelectedRow(item)}
         onDoubleClick={() => onOpenNewsletter(item)}
         hasUnsubscribeAccess={hasUnsubscribeAccess}
-        refetchPremium={refetchPremium}
-        openPremiumModal={openModal}
+        refetchextra={refetchextra}
+        openExtraModal={openModal}
         checked={selected.get(item.name) || false}
         onToggleSelect={onToggleSelect}
         readPercentage={readPercentage}
@@ -325,7 +325,7 @@ export function BulkUnsubscribeSection({
         onClose={() => setOpenedNewsletter(undefined)}
         refreshInterval={refreshInterval}
       />
-      <PremiumModal />
+      <ExtraModal />
     </>
   );
 }

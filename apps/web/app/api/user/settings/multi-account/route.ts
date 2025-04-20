@@ -11,7 +11,7 @@ async function getMultiAccountEmails(options: { email: string }) {
   const user = await prisma.user.findUnique({
     where: { email: options.email },
     select: {
-      premium: {
+      extra: {
         select: {
           users: { select: { email: true } },
           admins: { select: { id: true } },
@@ -21,8 +21,8 @@ async function getMultiAccountEmails(options: { email: string }) {
   });
 
   return {
-    users: user?.premium?.users || [],
-    admins: user?.premium?.admins || [],
+    users: user?.extra?.users || [],
+    admins: user?.extra?.admins || [],
   };
 }
 

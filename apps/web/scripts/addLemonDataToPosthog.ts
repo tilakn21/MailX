@@ -51,15 +51,15 @@ async function saveSubscriptions() {
 
     let email: string | null = null;
 
-    const premium = await prisma.premium.findFirst({
+    const extra = await prisma.extra.findFirst({
       where: {
         lemonSqueezyCustomerId: subscription.attributes.customer_id,
       },
       select: { users: { select: { email: true } } },
     });
 
-    if (premium?.users?.[0]?.email) {
-      email = premium?.users?.[0]?.email;
+    if (extra?.users?.[0]?.email) {
+      email = extra?.users?.[0]?.email;
     } else {
       const user = await prisma.user.findFirst({
         where: {
@@ -83,9 +83,9 @@ async function saveSubscriptions() {
 
     console.log("Saving subscription for user:", email);
 
-    await posthogCaptureEvent(email, "Upgraded to premium", {
+    await posthogCaptureEvent(email, "Upgraded to extra", {
       ...subscription.attributes,
-      $set: { premium: true, premiumTier: "subscription" },
+      $set: { extra: true, extraTier: "subscription" },
     });
   }
 }
@@ -113,15 +113,15 @@ async function saveOrders() {
 
     let email: string | null = null;
 
-    const premium = await prisma.premium.findFirst({
+    const extra = await prisma.extra.findFirst({
       where: {
         lemonSqueezyCustomerId: order.attributes.customer_id,
       },
       select: { users: { select: { email: true } } },
     });
 
-    if (premium?.users?.[0]?.email) {
-      email = premium?.users?.[0]?.email;
+    if (extra?.users?.[0]?.email) {
+      email = extra?.users?.[0]?.email;
     } else {
       const user = await prisma.user.findFirst({
         where: {
@@ -145,9 +145,9 @@ async function saveOrders() {
 
     console.log("Saving order for user:", email);
 
-    await posthogCaptureEvent(email, "Upgraded to premium", {
+    await posthogCaptureEvent(email, "Upgraded to extra", {
       ...order.attributes,
-      $set: { premium: true, premiumTier: "lifetime" },
+      $set: { extra: true, extraTier: "lifetime" },
     });
   }
 }

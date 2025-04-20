@@ -43,7 +43,6 @@ export const getAuthOptions: (options?: {
           ...(options?.consent ? { prompt: "consent" } : {}),
         },
       },
-
     }),
   ],
   adapter: PrismaAdapter(prisma),
@@ -176,9 +175,9 @@ export const getAuthOptions: (options?: {
       }
 
       if (isNewUser && user.email) {
-        logger.info("Handling pending premium invite", { email: user.email });
-        await handlePendingPremiumInvite({ email: user.email });
-        logger.info("Added user to premium from invite", { email: user.email });
+        logger.info("Handling pending extra invite", { email: user.email });
+        await handlePendingextraInvite({ email: user.email });
+        logger.info("Added user to extra from invite", { email: user.email });
       }
     },
   },
@@ -322,9 +321,9 @@ export async function saveRefreshToken(
   });
 }
 
-async function handlePendingPremiumInvite(user: { email: string }) {
+async function handlePendingextraInvite(user: { email: string }) {
   // Check for pending invite
-  const premium = await prisma.premium.findFirst({
+  const extra = await prisma.extra.findFirst({
     where: { pendingInvites: { has: user.email } },
     select: {
       id: true,
@@ -334,14 +333,14 @@ async function handlePendingPremiumInvite(user: { email: string }) {
     },
   });
 
-  if (premium?.lemonSqueezySubscriptionItemId) {
-    // Add user to premium and remove from pending invites
-    await prisma.premium.update({
-      where: { id: premium.id },
+  if (extra?.lemonSqueezySubscriptionItemId) {
+    // Add user to extra and remove from pending invites
+    await prisma.extra.update({
+      where: { id: extra.id },
       data: {
         users: { connect: { email: user.email } },
         pendingInvites: {
-          set: premium.pendingInvites.filter((email) => email !== user.email),
+          set: extra.pendingInvites.filter((email) => email !== user.email),
         },
       },
     });

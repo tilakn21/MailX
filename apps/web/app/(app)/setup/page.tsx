@@ -59,6 +59,7 @@ function FeatureCard({
   iconColor,
   title,
   description,
+  bgColor,
 }: {
   href: string;
   icon: LucideIcon;
@@ -66,10 +67,13 @@ function FeatureCard({
   iconColor: string;
   title: string;
   description: string;
+  bgColor: string;
 }) {
   return (
     <Link href={href} className="block">
-      <div className="h-full rounded-lg p-6 shadow transition-shadow hover:bg-muted/50 hover:shadow-md">
+      <div
+        className={`h-full rounded-lg p-6 shadow transition-shadow hover:shadow-md ${bgColor}`}
+      >
         <div
           className={`mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full ${iconBg}`}
         >
@@ -88,7 +92,9 @@ const features = [
     icon: MailIcon,
     iconBg: "bg-blue-100 dark:bg-blue-900/50",
     iconColor: "text-blue-600 dark:text-blue-400",
-    title: "Reply Zero",
+    bgColor:
+      "bg-blue-50 dark:bg-blue-950/30 hover:bg-blue-100/70 dark:hover:bg-blue-900/40",
+    title: "Focused Reply",
     description:
       "Track emails needing replies & follow-ups. Get AI-drafted responses",
   },
@@ -97,6 +103,8 @@ const features = [
     icon: ArchiveIcon,
     iconBg: "bg-purple-100 dark:bg-purple-900/50",
     iconColor: "text-purple-600 dark:text-purple-400",
+    bgColor:
+      "bg-purple-50 dark:bg-purple-950/30 hover:bg-purple-100/70 dark:hover:bg-purple-900/40",
     title: "Bulk Unsubscribe",
     description: "Easily unsubscribe from unwanted newsletters in one click",
   },
@@ -105,7 +113,9 @@ const features = [
     icon: BotIcon,
     iconBg: "bg-green-100 dark:bg-green-900/50",
     iconColor: "text-green-600 dark:text-green-400",
-    title: "AI Assistant",
+    bgColor:
+      "bg-green-50 dark:bg-green-950/30 hover:bg-green-100/70 dark:hover:bg-green-900/40",
+    title: "AssistantX",
     description:
       "Your personal email assistant that organizes, archives, and drafts replies",
   },
@@ -114,6 +124,8 @@ const features = [
     icon: BanIcon,
     iconBg: "bg-orange-100 dark:bg-orange-900/50",
     iconColor: "text-orange-600 dark:text-orange-400",
+    bgColor:
+      "bg-orange-50 dark:bg-orange-950/30 hover:bg-orange-100/70 dark:hover:bg-orange-900/40",
     title: "Cold Email Blocker",
     description: "Filter out unsolicited messages and keep your inbox clean",
   },

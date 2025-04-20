@@ -27,8 +27,8 @@ async function sendSummaryAllUpdate() {
       summaryEmailFrequency: {
         not: Frequency.NEVER,
       },
-      // Only send to premium users
-      premium: {
+      // Only send to extra users
+      extra: {
         lemonSqueezyRenewsAt: {
           gt: new Date(),
         },

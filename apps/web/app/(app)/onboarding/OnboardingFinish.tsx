@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { completedAppOnboardingAction } from "@/utils/actions/user";
 import { env } from "@/env";
-import { usePremium } from "@/components/PremiumAlert";
+import { useExtra } from "@/components/ExtraAlert";
 
 export const OnboardingFinish = () => {
-  const { isPremium } = usePremium();
+  const { isExtra } = useExtra();
 
   function getHref() {
-    if (isPremium) return env.NEXT_PUBLIC_APP_HOME_PATH;
+    if (isExtra) return env.NEXT_PUBLIC_APP_HOME_PATH;
     return env.NEXT_PUBLIC_WELCOME_UPGRADE_ENABLED
       ? "/welcome-upgrade"
       : env.NEXT_PUBLIC_APP_HOME_PATH;

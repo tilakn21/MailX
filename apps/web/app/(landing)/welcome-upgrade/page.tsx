@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { CheckCircleIcon } from "lucide-react";
-import { Pricing } from "@/app/(app)/premium/Pricing";
+import { ExtraFeatures } from "@/components/FreeFeatures";
 import { Loading } from "@/components/Loading";
 import { WelcomeUpgradeNav } from "@/app/(landing)/welcome-upgrade/WelcomeUpgradeNav";
 import { userCount } from "@/utils/config";
@@ -10,7 +10,7 @@ export default function WelcomeUpgradePage() {
     <>
       <WelcomeUpgradeNav />
       <Suspense fallback={<Loading />}>
-        <Pricing
+        <ExtraFeatures
           showSkipUpgrade
           header={
             <div className="mb-8 flex flex-col items-start">

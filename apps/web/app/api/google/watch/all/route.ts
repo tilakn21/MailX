@@ -5,7 +5,7 @@ import { watchEmails } from "@/app/api/google/watch/controller";
 import { hasCronSecret, hasPostCronSecret } from "@/utils/cron";
 import { withError } from "@/utils/middleware";
 import { captureException } from "@/utils/error";
-import { hasAiAccess, hasColdEmailAccess } from "@/utils/premium";
+import { hasAiAccess, hasColdEmailAccess } from "@/utils/extra-features";
 import { createScopedLogger } from "@/utils/logger";
 
 const logger = createScopedLogger("api/google/watch/all");
@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 async function watchAllEmails() {
-  const premiums = await prisma.premium.findMany({
+  const extras = await prisma.extra.findMany({
     where: {
       lemonSqueezyRenewsAt: { gt: new Date() },
     },
@@ -41,8 +41,8 @@ async function watchAllEmails() {
     },
   });
 
-  const users = premiums
-    .flatMap((premium) => premium.users.map((user) => ({ ...user, premium })))
+  const users = extras
+    .flatMap((extra) => extra.users.map((user) => ({ ...user, extra })))
     .sort((a, b) => {
       // Prioritize null dates first
       if (!a.watchEmailsExpirationDate && b.watchEmailsExpirationDate)
@@ -67,11 +67,11 @@ async function watchAllEmails() {
       logger.info("Watching emails for user", { email: user.email });
 
       const userHasAiAccess = hasAiAccess(
-        user.premium.aiAutomationAccess,
+        user.extra.aiAutomationAccess,
         user.aiApiKey,
       );
       const userHasColdEmailAccess = hasColdEmailAccess(
-        user.premium.coldEmailBlockerAccess,
+        user.extra.coldEmailBlockerAccess,
         user.aiApiKey,
       );
 

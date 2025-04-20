@@ -1,11 +1,11 @@
 import { Suspense } from "react";
-import { Pricing } from "@/app/(app)/premium/Pricing";
+import { ExtraFeatures } from "@/components/FreeFeatures";
 
-export default function Premium() {
+export default function extra() {
   return (
     <Suspense>
       <div className="bg-white pb-20">
-        <Pricing />
+        <ExtraFeatures />
       </div>
     </Suspense>
   );

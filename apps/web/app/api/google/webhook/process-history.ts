@@ -3,7 +3,11 @@ import { NextResponse } from "next/server";
 import { getGmailClientWithRefresh } from "@/utils/gmail/client";
 import prisma from "@/utils/prisma";
 import { GmailLabel } from "@/utils/gmail/label";
-import { hasAiAccess, hasColdEmailAccess, isPremium } from "@/utils/premium";
+import {
+  hasAiAccess,
+  hasColdEmailAccess,
+  isExtra,
+} from "@/utils/extra-features";
 import { ColdEmailSetting } from "@prisma/client";
 import { captureException } from "@/utils/error";
 import { unwatchEmails } from "@/app/api/google/watch/controller";
@@ -47,7 +51,7 @@ export async function processHistoryForUser(
           aiProvider: true,
           aiModel: true,
           aiApiKey: true,
-          premium: {
+          extra: {
             select: {
               lemonSqueezyRenewsAt: true,
               coldEmailBlockerAccess: true,
@@ -65,25 +69,25 @@ export async function processHistoryForUser(
     return NextResponse.json({ ok: true });
   }
 
-  const premium = isPremium(account.user.premium?.lemonSqueezyRenewsAt || null)
-    ? account.user.premium
+  const extra = isExtra(account.user.extra?.lemonSqueezyRenewsAt || null)
+    ? account.user.extra
     : undefined;
 
-  if (!premium) {
-    logger.info("Account not premium", {
+  if (!extra) {
+    logger.info("Account not extra", {
       email,
-      lemonSqueezyRenewsAt: account.user.premium?.lemonSqueezyRenewsAt,
+      lemonSqueezyRenewsAt: account.user.extra?.lemonSqueezyRenewsAt,
     });
     await unwatchEmails(account);
     return NextResponse.json({ ok: true });
   }
 
   const userHasAiAccess = hasAiAccess(
-    premium.aiAutomationAccess,
+    extra.aiAutomationAccess,
     account.user.aiApiKey,
   );
   const userHasColdEmailAccess = hasColdEmailAccess(
-    premium.coldEmailBlockerAccess,
+    extra.coldEmailBlockerAccess,
     account.user.aiApiKey,
   );
 

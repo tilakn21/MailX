@@ -71,7 +71,7 @@ export function BulkUnsubscribeDesktop({
 
 export function BulkUnsubscribeRowDesktop({
   item,
-  refetchPremium,
+  refetchextra,
   selected,
   onSelectRow,
   onDoubleClick,
@@ -79,7 +79,7 @@ export function BulkUnsubscribeRowDesktop({
   mutate,
   onOpenNewsletter,
   labels,
-  openPremiumModal,
+  openExtraModal,
   userEmail,
   onToggleSelect,
   checked,
@@ -137,11 +137,11 @@ export function BulkUnsubscribeRowDesktop({
           item={item}
           hasUnsubscribeAccess={hasUnsubscribeAccess}
           mutate={mutate}
-          refetchPremium={refetchPremium}
+          refetchextra={refetchextra}
           onOpenNewsletter={onOpenNewsletter}
           selected={selected}
           labels={labels}
-          openPremiumModal={openPremiumModal}
+          openExtraModal={openExtraModal}
           userEmail={userEmail}
         />
       </TableCell>

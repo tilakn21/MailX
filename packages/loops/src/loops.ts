@@ -40,7 +40,7 @@ export async function deleteContact(
   return resp;
 }
 
-export async function upgradedToPremium(
+export async function upgradedToextra(
   email: string,
   tier: string,
 ): Promise<{ success: boolean }> {
@@ -55,14 +55,14 @@ export async function upgradedToPremium(
   return resp;
 }
 
-export async function switchedPremiumPlan(
+export async function switchedextraPlan(
   email: string,
   tier: string,
 ): Promise<{ success: boolean }> {
   const loops = getLoopsClient();
   if (!loops) return { success: false };
   const resp = await loops.sendEvent({
-    eventName: "switched_premium_plan",
+    eventName: "switched_extra_plan",
     email,
     contactProperties: { tier },
     eventProperties: { tier },
@@ -70,7 +70,7 @@ export async function switchedPremiumPlan(
   return resp;
 }
 
-export async function cancelledPremium(
+export async function cancelledextra(
   email: string,
 ): Promise<{ success: boolean }> {
   const loops = getLoopsClient();

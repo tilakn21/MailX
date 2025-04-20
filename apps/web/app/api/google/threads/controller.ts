@@ -13,14 +13,34 @@ import { decodeSnippet } from "@/utils/gmail/decode";
 import type { ThreadsQuery } from "@/app/api/google/threads/validation";
 import { ExecutedRuleStatus } from "@prisma/client";
 import { SafeError } from "@/utils/error";
+import { cache } from "react";
+
+// Cache time in milliseconds
+const CACHE_TTL = 60 * 1000; // 1 minute
+const threadCache = new Map<string, { data: any; timestamp: number }>();
 
 export type ThreadsResponse = Awaited<ReturnType<typeof getThreads>>;
+
+// Create a cache key from the query parameters
+function createCacheKey(query: ThreadsQuery, email: string): string {
+  return `${email}-${JSON.stringify(query)}`;
+}
 
 export async function getThreads(query: ThreadsQuery) {
   const session = await auth();
   const email = session?.user.email;
   if (!email) throw new SafeError("Not authenticated");
 
+  // Check cache first
+  const cacheKey = createCacheKey(query, email);
+  const cachedData = threadCache.get(cacheKey);
+  const now = Date.now();
+
+  if (cachedData && now - cachedData.timestamp < CACHE_TTL) {
+    return cachedData.data;
+  }
+
+  // If not in cache or expired, fetch fresh data
   const gmail = getGmailClient(session);
   const token = await getGmailAccessToken(session);
   const accessToken = token?.token;
@@ -40,25 +60,32 @@ export async function getThreads(query: ThreadsQuery) {
     return undefined;
   }
 
+  // Use a smaller batch size for initial load if specified in query
+  const batchSize = query.limit || 50;
+
   const { threads: gmailThreads, nextPageToken } =
     await getThreadsWithNextPageToken({
       gmail,
       q: getQuery(),
       labelIds: query.labelId ? [query.labelId] : getLabelIds(query.type),
-      maxResults: query.limit || 50,
+      maxResults: batchSize,
       pageToken: query.nextPageToken || undefined,
     });
 
   const threadIds = gmailThreads?.map((t) => t.id).filter(isDefined) || [];
 
+  // Skip fetching plans if there are no threads
+  if (threadIds.length === 0) {
+    return { threads: [], nextPageToken };
+  }
+
   const [threads, plans] = await Promise.all([
-    getThreadsBatch(threadIds, accessToken), // may have been faster not using batch method, but doing 50 getMessages in parallel
+    getThreadsBatch(threadIds, accessToken),
     prisma.executedRule.findMany({
       where: {
         userId: session.user.id,
         threadId: { in: threadIds },
         status: {
-          // TODO probably want to show applied rules here in the future too
           in: [ExecutedRuleStatus.PENDING, ExecutedRuleStatus.SKIPPED],
         },
       },
@@ -74,12 +101,21 @@ export async function getThreads(query: ThreadsQuery) {
     }),
   ]);
 
-  const threadsWithMessages = await Promise.all(
-    threads.map(async (thread) => {
-      const id = thread.id;
-      if (!id) return;
-      const messages = parseMessages(thread, { withoutIgnoredSenders: true });
+  // Process threads in parallel with optimized category fetching
+  const categoryPromises = threads
+    .filter((thread) => thread.id)
+    .map((thread) => getCategory({ email, threadId: thread.id! }));
 
+  // Fetch all categories in parallel
+  const categories = await Promise.all(categoryPromises);
+
+  // Map threads to their processed form without awaiting in the map function
+  const threadsWithMessages = threads
+    .map((thread, index) => {
+      const id = thread.id;
+      if (!id) return undefined;
+
+      const messages = parseMessages(thread, { withoutIgnoredSenders: true });
       const plan = plans.find((p) => p.threadId === id);
 
       return {
@@ -87,15 +123,31 @@ export async function getThreads(query: ThreadsQuery) {
         messages,
         snippet: decodeSnippet(thread.snippet),
         plan,
-        category: await getCategory({ email, threadId: id }),
+        category: categories[index],
       };
-    }) || [],
-  );
+    })
+    .filter(isDefined);
 
-  return {
-    threads: threadsWithMessages.filter(isDefined),
+  const result = {
+    threads: threadsWithMessages,
     nextPageToken,
   };
+
+  // Store in cache
+  threadCache.set(cacheKey, { data: result, timestamp: now });
+
+  // Clean up old cache entries
+  if (threadCache.size > 100) {
+    const keysToDelete = [];
+    for (const [key, value] of threadCache.entries()) {
+      if (now - value.timestamp > CACHE_TTL * 2) {
+        keysToDelete.push(key);
+      }
+    }
+    keysToDelete.forEach((key) => threadCache.delete(key));
+  }
+
+  return result;
 }
 
 function getLabelIds(type?: string | null) {

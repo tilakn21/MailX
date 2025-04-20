@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import prisma from "@/utils/prisma";
 import { History } from "@/app/(app)/automation/History";
-import { Pending } from "@/app/(app)/automation/Pending";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { auth } from "@/app/api/auth/[...nextauth]/auth";
 import { Rules } from "@/app/(app)/automation/Rules";
@@ -19,7 +18,7 @@ import { GmailProvider } from "@/providers/GmailProvider";
 import { ASSISTANT_ONBOARDING_COOKIE } from "@/utils/cookies";
 import { Button } from "@/components/ui/button";
 
-export const maxDuration = 300; // Applies to the actions
+export const maxDuration = 300;
 
 export default async function AutomationPage() {
   const session = await auth();
@@ -45,7 +44,6 @@ export default async function AutomationPage() {
     <GmailProvider>
       <Suspense>
         <PermissionsCheck />
-
         <Tabs defaultValue="prompt">
           <TabsToolbar>
             <div className="w-full overflow-x-auto">
@@ -54,18 +52,13 @@ export default async function AutomationPage() {
                 <TabsTrigger value="rules">Rules</TabsTrigger>
                 <TabsTrigger value="test">Test</TabsTrigger>
                 <TabsTrigger value="history">History</TabsTrigger>
-                <TabsTrigger value="pending">Pending</TabsTrigger>
                 <TabsTrigger value="knowledge">Knowledge Base</TabsTrigger>
-                {/* <TabsTrigger value="groups">Groups</TabsTrigger> */}
               </TabsList>
             </div>
-
             <div className="flex items-center gap-2">
               <Button asChild variant="outline">
                 <Link href="/automation/onboarding">Set Up</Link>
               </Button>
-
-              {/* Video button removed per user request */}
             </div>
           </TabsToolbar>
 
@@ -81,15 +74,8 @@ export default async function AutomationPage() {
           <TabsContent value="history" className="content-container mb-10">
             <History />
           </TabsContent>
-          <TabsContent value="pending" className="content-container mb-10">
-            <Pending />
-          </TabsContent>
           <TabsContent value="knowledge" className="content-container mb-10">
             <KnowledgeBase />
-          </TabsContent>
-          {/* no longer in use */}
-          <TabsContent value="groups" className="content-container mb-10">
-            <Groups />
           </TabsContent>
         </Tabs>
       </Suspense>

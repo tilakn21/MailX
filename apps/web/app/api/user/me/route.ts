@@ -18,7 +18,7 @@ async function getUser(userId: string) {
       summaryEmailFrequency: true,
       coldEmailBlocker: true,
       coldEmailPrompt: true,
-      premium: {
+      extra: {
         select: {
           lemonSqueezyCustomerId: true,
           lemonSqueezySubscriptionId: true,

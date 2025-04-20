@@ -1,19 +1,20 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback, useEffect, memo } from "react";
 import Link from "next/link";
 import { HistoryIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionDescription } from "@/components/Typography";
 import type { ThreadsResponse } from "@/app/api/google/threads/controller";
 import type { ThreadsQuery } from "@/app/api/google/threads/validation";
+import type { ThreadWithPayloadMessages } from "@/utils/types";
 import { LoadingContent } from "@/components/LoadingContent";
 import { runAiRules } from "@/utils/queue/email-actions";
 import { sleep } from "@/utils/sleep";
-import { PremiumAlertWithData, usePremium } from "@/components/PremiumAlert";
+import { ExtraAlertWithData, useExtra } from "@/components/ExtraAlert";
 import { SetDateDropdown } from "@/app/(app)/automation/SetDateDropdown";
 import { dateToSeconds } from "@/utils/date";
-import { useThreads } from "@/hooks/useThreads";
+import useSWR from "swr";
 import { useAiQueueState } from "@/store/ai-queue";
 import {
   Dialog,
@@ -23,22 +24,49 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-export function BulkRunRules() {
+export const BulkRunRules = memo(function BulkRunRules() {
   const [isOpen, setIsOpen] = useState(false);
   const [totalThreads, setTotalThreads] = useState(0);
 
-  const { data, isLoading, error } = useThreads({ type: "inbox" });
+  // Only fetch data when dialog is open to improve performance
+  const { data, isLoading, error } = useSWR<ThreadsResponse>(
+    isOpen
+      ? `/api/google/threads?${new URLSearchParams({ type: "inbox" }).toString()}`
+      : null,
+    {
+      suspense: false,
+      revalidateOnFocus: false,
+      dedupingInterval: 10000, // Avoid excessive refetching
+    },
+  );
 
   const queue = useAiQueueState();
 
-  const { hasAiAccess, isLoading: isLoadingPremium } = usePremium();
+  const { hasAiAccess, isLoading: isLoadingextra } = useExtra();
 
   const [running, setRunning] = useState(false);
 
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
 
-  const abortRef = useRef<() => void>(undefined);
+  const abortRef = useRef<(() => void) | undefined>(undefined);
+
+  // Reset total threads when dialog opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setTotalThreads(0);
+    }
+  }, [isOpen]);
+
+  // Memoize the increment function to avoid unnecessary rerenders
+  const incrementThreadsQueued = useCallback((count: number) => {
+    setTotalThreads((total) => total + count);
+  }, []);
+
+  // Memoize the complete function
+  const handleComplete = useCallback(() => {
+    setRunning(false);
+  }, []);
 
   return (
     <div>
@@ -53,7 +81,7 @@ export function BulkRunRules() {
             <DialogTitle>Process Existing Inbox Emails</DialogTitle>
           </DialogHeader>
           <LoadingContent loading={isLoading} error={error}>
-            {data && (
+            {data && data.threads && (
               <>
                 <SectionDescription>
                   This runs your rules on emails currently in your inbox (that
@@ -69,7 +97,7 @@ export function BulkRunRules() {
                   </div>
                 )}
                 <div className="space-y-4">
-                  <LoadingContent loading={isLoadingPremium}>
+                  <LoadingContent loading={isLoadingextra}>
                     {hasAiAccess ? (
                       <div className="flex flex-col space-y-2">
                         <div className="grid grid-cols-2 gap-2">
@@ -96,9 +124,8 @@ export function BulkRunRules() {
                             setRunning(true);
                             abortRef.current = await onRun(
                               { startDate, endDate },
-                              (count) =>
-                                setTotalThreads((total) => total + count),
-                              () => setRunning(false),
+                              incrementThreadsQueued,
+                              handleComplete,
                             );
                           }}
                         >
@@ -114,7 +141,7 @@ export function BulkRunRules() {
                         )}
                       </div>
                     ) : (
-                      <PremiumAlertWithData />
+                      <ExtraAlertWithData />
                     )}
                   </LoadingContent>
 
@@ -137,16 +164,17 @@ export function BulkRunRules() {
       </Dialog>
     </div>
   );
-}
+});
 
 // fetch batches of messages and add them to the ai queue
 async function onRun(
   { startDate, endDate }: { startDate: Date; endDate?: Date },
   incrementThreadsQueued: (count: number) => void,
   onComplete: () => void,
-) {
+): Promise<() => void> {
   let nextPageToken = "";
   const LIMIT = 25;
+  const MAX_ITERATIONS = 100;
 
   const startDateInSeconds = dateToSeconds(startDate);
   const endDateInSeconds = endDate ? dateToSeconds(endDate) : "";
@@ -161,37 +189,76 @@ async function onRun(
   }
 
   async function run() {
-    for (let i = 0; i < 100; i++) {
-      const query: ThreadsQuery = {
-        type: "inbox",
-        nextPageToken,
-        limit: LIMIT,
-        q,
-      };
-      const res = await fetch(
-        `/api/google/threads?${new URLSearchParams(query as any).toString()}`,
-      );
-      const data: ThreadsResponse = await res.json();
+    try {
+      for (let i = 0; i < MAX_ITERATIONS && !aborted; i++) {
+        const query: ThreadsQuery = {
+          type: "inbox",
+          nextPageToken,
+          limit: LIMIT,
+          q,
+        };
 
-      nextPageToken = data.nextPageToken || "";
+        try {
+          const res = await fetch(
+            `/api/google/threads?${new URLSearchParams(query as Record<string, string>).toString()}`,
+            { headers: { "Content-Type": "application/json" } },
+          );
 
-      const threadsWithoutPlan = data.threads.filter((t) => !t.plan);
+          if (!res.ok) {
+            console.error(
+              `Error fetching threads: ${res.status} ${res.statusText}`,
+            );
+            break;
+          }
 
-      incrementThreadsQueued(threadsWithoutPlan.length);
+          const data: ThreadsResponse = await res.json();
+          nextPageToken = data.nextPageToken || "";
 
-      runAiRules(threadsWithoutPlan, false);
+          // Skip processing if no threads or if aborted
+          if (!data.threads?.length || aborted) {
+            if (!nextPageToken) break;
+            continue;
+          }
 
-      if (!nextPageToken || aborted) break;
+          const threadsWithoutPlan = data.threads.filter((t: any) => !t.plan);
 
-      // avoid gmail api rate limits
-      // ai takes longer anyway
-      await sleep(threadsWithoutPlan.length ? 5_000 : 2_000);
+          if (threadsWithoutPlan.length > 0) {
+            incrementThreadsQueued(threadsWithoutPlan.length);
+            runAiRules(threadsWithoutPlan, false);
+          }
+
+          if (!nextPageToken) break;
+
+          // Adaptive sleep based on thread count to avoid rate limits
+          // but ensure we don't wait too long for small batches
+          const sleepTime = Math.min(
+            Math.max(threadsWithoutPlan.length * 200, 2000),
+            5000,
+          );
+          await sleep(sleepTime);
+        } catch (error) {
+          console.error("Error processing batch:", error);
+          // Continue to next batch despite errors
+          await sleep(3000); // Wait a bit longer after an error
+        }
+      }
+    } catch (error) {
+      console.error("Fatal error in bulk processing:", error);
+    } finally {
+      onComplete();
     }
-
-    onComplete();
   }
 
-  run();
+  // Start processing asynchronously and handle any errors
+  const runPromise = run().catch((error) => {
+    console.error("Unhandled error in bulk processing:", error);
+    onComplete();
+  });
+
+  // For debugging
+  runPromise.then(() => {
+    console.log("Bulk processing completed successfully");
+  });
 
   return abort;
 }

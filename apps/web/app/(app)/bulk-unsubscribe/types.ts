@@ -25,8 +25,8 @@ export interface RowProps {
   onSelectRow: () => void;
   onDoubleClick: () => void;
   hasUnsubscribeAccess: boolean;
-  refetchPremium: () => Promise<any>;
-  openPremiumModal: () => void;
+  refetchextra: () => Promise<any>;
+  openExtraModal: () => void;
   checked: boolean;
   onToggleSelect: (id: string) => void;
 }

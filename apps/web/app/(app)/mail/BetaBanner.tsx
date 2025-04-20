@@ -2,20 +2,24 @@
 
 import { useLocalStorage } from "usehooks-ts";
 import { Banner } from "@/components/Banner";
+import { memo } from "react";
 
-export function BetaBanner() {
+export const BetaBanner = memo(function BetaBanner() {
   const [bannerVisible, setBannerVisible] = useLocalStorage<
     boolean | undefined
   >("mailBetaBannerVisibile", true);
 
-  if (bannerVisible && typeof window !== "undefined")
-    return (
-      <Banner
-        title="Beta"
-        description="Mail is currently in beta. It is not intended to be a full replacement for your email client yet."
-        onClose={() => setBannerVisible(false)}
-      />
-    );
+  // Early return if banner is not visible to avoid unnecessary rendering
+  if (!bannerVisible) return null;
 
-  return null;
-}
+  // Only render on client side
+  if (typeof window === "undefined") return null;
+
+  return (
+    <Banner
+      title="Beta"
+      description="Mail is currently in beta. It is not intended to be a full replacement for your email client yet."
+      onClose={() => setBannerVisible(false)}
+    />
+  );
+});

@@ -3,7 +3,7 @@ import { ColdEmailList } from "@/app/(app)/cold-email-blocker/ColdEmailList";
 import { ColdEmailSettings } from "@/app/(app)/cold-email-blocker/ColdEmailSettings";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { PremiumAlertWithData } from "@/components/PremiumAlert";
+import { ExtraAlertWithData } from "@/components/ExtraAlert";
 import { ColdEmailRejected } from "@/app/(app)/cold-email-blocker/ColdEmailRejected";
 import { PermissionsCheck } from "@/app/(app)/PermissionsCheck";
 import { ColdEmailTest } from "@/app/(app)/cold-email-blocker/ColdEmailTest";
@@ -16,7 +16,7 @@ export default function ColdEmailBlockerPage() {
       <Suspense>
         <PermissionsCheck />
         <div className="content-container">
-          <PremiumAlertWithData className="mt-2" />
+          <ExtraAlertWithData className="mt-2" />
         </div>
 
         <Tabs defaultValue="cold-emails">

@@ -1,4 +1,4 @@
-import { hasAiAccess } from "@/utils/premium";
+import { hasAiAccess } from "@/utils/extra-features";
 import prisma from "@/utils/prisma";
 
 export async function validateUserAndAiAccess(userId: string) {
@@ -11,13 +11,13 @@ export async function validateUserAndAiAccess(userId: string) {
       aiModel: true,
       aiApiKey: true,
       about: true,
-      premium: { select: { aiAutomationAccess: true } },
+      extra: { select: { aiAutomationAccess: true } },
     },
   });
   if (!user) return { error: "User not found" };
 
   const userHasAiAccess = hasAiAccess(
-    user.premium?.aiAutomationAccess,
+    user.extra?.aiAutomationAccess,
     user.aiApiKey,
   );
   if (!userHasAiAccess) return { error: "Please upgrade for AI access" };

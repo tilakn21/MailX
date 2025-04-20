@@ -74,7 +74,7 @@ export const examples: {
   {
     title: "Respond to common question",
     description:
-      "If someone asks how much the premium plan is, respond: 'Our premium plan is $10 per month.'",
+      "If someone asks how much the extra plan is, respond: 'Our extra plan is $10 per month.'",
     icon: <MailQuestionIcon className="h-4 w-4" />,
     rule: {
       name: "Respond to question",
@@ -82,13 +82,13 @@ export const examples: {
         {
           type: ConditionType.AI,
           instructions:
-            "If someone asks how much the premium plan is, respond: 'Our premium plan is $10 per month.'",
+            "If someone asks how much the extra plan is, respond: 'Our extra plan is $10 per month.'",
         },
       ],
       actions: [
         {
           type: ActionType.REPLY,
-          content: { value: "Hey, our premium plan is $10 per month!" },
+          content: { value: "Hey, our extra plan is $10 per month!" },
         },
       ],
     },

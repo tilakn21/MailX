@@ -18,12 +18,12 @@ async function main() {
         {
           OR: [
             {
-              premium: {
+              extra: {
                 lemonSqueezyRenewsAt: null,
               },
             },
             {
-              premium: {
+              extra: {
                 lemonSqueezyRenewsAt: { lt: new Date() },
               },
             },

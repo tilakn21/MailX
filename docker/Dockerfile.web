@@ -2,11 +2,22 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-RUN apk add --no-cache openssl
+# Install necessary dependencies
+RUN apk add --no-cache openssl git bash
 
-RUN npm install -g pnpm
+# Install pnpm
+RUN npm install -g pnpm cross-env
 
+# Copy package files first for better caching
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/web/package.json ./apps/web/
+COPY packages/ ./packages/
+
+# Copy the rest of the application
 COPY . .
+
+# Make entrypoint script executable
+RUN chmod +x /app/apps/web/entrypoint.sh
 
 WORKDIR /app/apps/web
 

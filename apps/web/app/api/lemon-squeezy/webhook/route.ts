@@ -5,20 +5,20 @@ import { withError } from "@/utils/middleware";
 import { env } from "@/env";
 import { posthogCaptureEvent } from "@/utils/posthog";
 import {
-  cancelPremium,
+  cancelextra,
   editEmailAccountsAccess,
-  extendPremium,
-  upgradeToPremium,
-} from "@/utils/premium/server";
+  extendextra,
+  upgradeToextra,
+} from "@/utils/extra-features";
 import type { Payload } from "@/app/api/lemon-squeezy/webhook/types";
-import { PremiumTier } from "@prisma/client";
+import { extraTier } from "@prisma/client";
 import {
-  cancelledPremium,
-  switchedPremiumPlan,
-  upgradedToPremium,
+  cancelledextra,
+  switchedextraPlan,
+  upgradedToextra,
 } from "@inboxzero/loops";
 import { SafeError } from "@/utils/error";
-import { getSubscriptionTier } from "@/app/(app)/premium/config";
+import { getSubscriptionTier } from "@/utils/extra-features";
 import { createScopedLogger } from "@/utils/logger";
 
 const logger = createScopedLogger("Lemon Squeezy Webhook");
@@ -54,13 +54,13 @@ export const POST = withError(async (request: Request) => {
 
   const lemonSqueezyCustomerId = payload.data.attributes.customer_id;
 
-  const premium = await prisma.premium.findFirst({
+  const extra = await prisma.extra.findFirst({
     where: { lemonSqueezyCustomerId },
     select: { id: true },
   });
-  const premiumId = premium?.id;
+  const extraId = extra?.id;
 
-  if (!premiumId) {
+  if (!extraId) {
     logger.warn("No user found", { lemonSqueezyCustomerId });
 
     return NextResponse.json({ ok: true });
@@ -71,7 +71,7 @@ export const POST = withError(async (request: Request) => {
     variant === env.NEXT_PUBLIC_LIFETIME_EXTRA_SEATS_VARIANT_ID;
   if (payload.meta.event_name === "order_created") {
     if (isLifetimeSeatPlan) {
-      return await lifetimeSeatOrder({ payload, premiumId });
+      return await lifetimeSeatOrder({ payload, extraId });
     }
     // license plan - not handled here
     return NextResponse.json({ ok: true });
@@ -79,7 +79,7 @@ export const POST = withError(async (request: Request) => {
 
   // renewal
   if (payload.meta.event_name === "subscription_updated") {
-    return await subscriptionUpdated({ payload, premiumId });
+    return await subscriptionUpdated({ payload, extraId });
   }
 
   // changed plan
@@ -98,7 +98,7 @@ export const POST = withError(async (request: Request) => {
   if (payload.meta.event_name === "subscription_payment_failed") {
     return await subscriptionCancelled({
       payload,
-      premiumId,
+      extraId,
       endsAt: new Date().toISOString(),
       variantId: payload.data.attributes.variant_id,
     });
@@ -106,14 +106,14 @@ export const POST = withError(async (request: Request) => {
 
   // payment success
   if (payload.meta.event_name === "subscription_payment_success") {
-    return await subscriptionPaymentSuccess({ payload, premiumId });
+    return await subscriptionPaymentSuccess({ payload, extraId });
   }
 
   // cancelled or expired
   if (payload.data.attributes.ends_at) {
     return await subscriptionCancelled({
       payload,
-      premiumId,
+      extraId,
       endsAt: payload.data.attributes.ends_at,
       variantId: payload.data.attributes.variant_id,
     });
@@ -158,30 +158,30 @@ async function subscriptionCreated({
     userId,
   });
 
-  const { updatedPremium, tier } = await handleSubscriptionCreated(
+  const { updatedextra, tier } = await handleSubscriptionCreated(
     payload,
     userId,
   );
 
-  const email = getEmailFromPremium(updatedPremium);
+  const email = getEmailFromextra(updatedextra);
   if (email) {
     try {
       await Promise.allSettled([
         posthogCaptureEvent(
           email,
           payload.data.attributes.status === "on_trial"
-            ? "Premium trial started"
-            : "Upgraded to premium",
+            ? "extra trial started"
+            : "Upgraded to extra",
           {
             ...payload.data.attributes,
             $set: {
-              premium: true,
-              premiumTier: "subscription",
-              premiumStatus: payload.data.attributes.status,
+              extra: true,
+              extraTier: "subscription",
+              extraStatus: payload.data.attributes.status,
             },
           },
         ),
-        upgradedToPremium(email, tier),
+        upgradedToextra(email, tier),
       ]);
     } catch (error) {
       logger.error("Error capturing event", {
@@ -209,24 +209,24 @@ async function subscriptionPlanChanged({
     userId,
   });
 
-  const { updatedPremium, tier } = await handleSubscriptionCreated(
+  const { updatedextra, tier } = await handleSubscriptionCreated(
     payload,
     userId,
   );
 
-  const email = getEmailFromPremium(updatedPremium);
+  const email = getEmailFromextra(updatedextra);
   if (email) {
     try {
       await Promise.allSettled([
-        posthogCaptureEvent(email, "Switched premium plan", {
+        posthogCaptureEvent(email, "Switched extra plan", {
           ...payload.data.attributes,
           $set: {
-            premium: true,
-            premiumTier: "subscription",
-            premiumStatus: payload.data.attributes.status,
+            extra: true,
+            extraTier: "subscription",
+            extraStatus: payload.data.attributes.status,
           },
         }),
-        switchedPremiumPlan(email, tier),
+        switchedextraPlan(email, tier),
       ]);
     } catch (error) {
       logger.error("Error capturing event", {
@@ -261,7 +261,7 @@ async function handleSubscriptionCreated(payload: Payload, userId: string) {
     variantId: payload.data.attributes.variant_id,
   });
 
-  const updatedPremium = await upgradeToPremium({
+  const updatedextra = await upgradeToextra({
     userId,
     tier,
     lemonSqueezyRenewsAt,
@@ -275,7 +275,7 @@ async function handleSubscriptionCreated(payload: Payload, userId: string) {
     lemonSqueezyVariantId: payload.data.attributes.variant_id,
   });
 
-  return { updatedPremium, tier };
+  return { updatedextra, tier };
 }
 
 async function lifetimeOrder({
@@ -295,9 +295,9 @@ async function lifetimeOrder({
     lemonSqueezyVariantId: payload.data.attributes.variant_id,
   });
 
-  const updatedPremium = await upgradeToPremium({
+  const updatedextra = await upgradeToextra({
     userId,
-    tier: PremiumTier.LIFETIME,
+    tier: extraTier.LIFETIME,
     lemonSqueezySubscriptionId: null,
     lemonSqueezySubscriptionItemId: null,
     lemonSqueezyRenewsAt: null,
@@ -307,14 +307,14 @@ async function lifetimeOrder({
     lemonSqueezyVariantId: payload.data.attributes.variant_id,
   });
 
-  const email = getEmailFromPremium(updatedPremium);
+  const email = getEmailFromextra(updatedextra);
   if (email) {
     await Promise.allSettled([
       posthogCaptureEvent(email, "Upgraded to lifetime plan", {
         ...payload.data.attributes,
-        $set: { premium: true, premiumTier: "lifetime" },
+        $set: { extra: true, extraTier: "lifetime" },
       }),
-      upgradedToPremium(email, PremiumTier.LIFETIME),
+      upgradedToextra(email, extraTier.LIFETIME),
     ]);
   }
 
@@ -323,29 +323,29 @@ async function lifetimeOrder({
 
 async function lifetimeSeatOrder({
   payload,
-  premiumId,
+  extraId,
 }: {
   payload: Payload;
-  premiumId: string;
+  extraId: string;
 }) {
   if (!payload.data.attributes.first_order_item)
     throw new Error("No order item");
 
   logger.info("Lifetime seat order", {
     quantity: payload.data.attributes.first_order_item.quantity,
-    premiumId,
+    extraId,
   });
 
-  const updatedPremium = await editEmailAccountsAccess({
-    premiumId,
+  const updatedextra = await editEmailAccountsAccess({
+    extraId,
     count: payload.data.attributes.first_order_item.quantity,
   });
 
-  const email = updatedPremium && getEmailFromPremium(updatedPremium);
+  const email = updatedextra && getEmailFromextra(updatedextra);
   if (email) {
     await posthogCaptureEvent(email, "Added seats to lifetime plan", {
       ...payload.data.attributes,
-      $set: { premium: true, premiumTier: "lifetime" },
+      $set: { extra: true, extraTier: "lifetime" },
     });
   }
 
@@ -354,38 +354,38 @@ async function lifetimeSeatOrder({
 
 async function subscriptionUpdated({
   payload,
-  premiumId,
+  extraId,
 }: {
   payload: Payload;
-  premiumId: string;
+  extraId: string;
 }) {
   if (!payload.data.attributes.renews_at)
     throw new Error("No renews_at provided");
 
   logger.info("Subscription updated", {
     lemonSqueezyRenewsAt: new Date(payload.data.attributes.renews_at),
-    premiumId,
+    extraId,
   });
 
-  const updatedPremium = await extendPremium({
-    premiumId,
+  const updatedextra = await extendextra({
+    extraId,
     lemonSqueezyRenewsAt: new Date(payload.data.attributes.renews_at),
   });
 
-  const email = getEmailFromPremium(updatedPremium);
+  const email = getEmailFromextra(updatedextra);
 
   if (email) {
     const event =
       payload.data.attributes.status === "on_trial"
-        ? "Premium subscription trial started"
-        : `Premium subscription ${payload.data.attributes.status}`;
+        ? "extra subscription trial started"
+        : `extra subscription ${payload.data.attributes.status}`;
 
     await posthogCaptureEvent(email, event, {
       ...payload.data.attributes,
       $set: {
-        premium: true,
-        premiumTier: "subscription",
-        premiumStatus: payload.data.attributes.status,
+        extra: true,
+        extraTier: "subscription",
+        extraStatus: payload.data.attributes.status,
       },
     });
   }
@@ -395,23 +395,23 @@ async function subscriptionUpdated({
 
 async function subscriptionCancelled({
   payload,
-  premiumId,
+  extraId,
   endsAt,
   variantId,
 }: {
   payload: Payload;
-  premiumId: string;
+  extraId: string;
   endsAt: NonNullable<Payload["data"]["attributes"]["ends_at"]>;
   variantId: NonNullable<Payload["data"]["attributes"]["variant_id"]>;
 }) {
   logger.info("Subscription cancelled", {
     endsAt: new Date(endsAt),
     variantId,
-    premiumId,
+    extraId,
   });
 
-  const updatedPremium = await cancelPremium({
-    premiumId,
+  const updatedextra = await cancelextra({
+    extraId,
     variantId,
     lemonSqueezyEndsAt: new Date(endsAt),
     expired:
@@ -419,20 +419,20 @@ async function subscriptionCancelled({
       new Date(endsAt) < new Date(),
   });
 
-  if (!updatedPremium) return NextResponse.json({ ok: true });
+  if (!updatedextra) return NextResponse.json({ ok: true });
 
-  const email = getEmailFromPremium(updatedPremium);
+  const email = getEmailFromextra(updatedextra);
   if (email) {
     await Promise.allSettled([
-      posthogCaptureEvent(email, "Cancelled premium subscription", {
+      posthogCaptureEvent(email, "Cancelled extra subscription", {
         ...payload.data.attributes,
         $set: {
-          premiumCancelled: true,
-          premium: false,
-          premiumStatus: payload.data.attributes.status,
+          extraCancelled: true,
+          extra: false,
+          extraStatus: payload.data.attributes.status,
         },
       }),
-      cancelledPremium(email),
+      cancelledextra(email),
     ]);
   }
 
@@ -441,13 +441,13 @@ async function subscriptionCancelled({
 
 async function subscriptionPaymentSuccess({
   payload,
-  premiumId,
+  extraId,
 }: {
   payload: Payload;
-  premiumId: string;
+  extraId: string;
 }) {
   logger.info("Subscription payment success", {
-    premiumId,
+    extraId,
     lemonSqueezyId: payload.data.id,
     lemonSqueezyType: payload.data.type,
   });
@@ -458,15 +458,15 @@ async function subscriptionPaymentSuccess({
     );
   }
 
-  const premium = await prisma.premium.findUnique({
-    where: { id: premiumId },
+  const extra = await prisma.extra.findUnique({
+    where: { id: extraId },
     select: {
       admins: { select: { email: true } },
       users: { select: { email: true } },
     },
   });
 
-  const email = premium?.admins?.[0]?.email || premium?.users?.[0]?.email;
+  const email = extra?.admins?.[0]?.email || extra?.users?.[0]?.email;
   if (!email) throw new Error("No email found");
   await posthogCaptureEvent(email, "Payment success", {
     totalPaidUSD: payload.data.attributes.total_usd,
@@ -476,8 +476,6 @@ async function subscriptionPaymentSuccess({
   return NextResponse.json({ ok: true });
 }
 
-function getEmailFromPremium(premium: {
-  users: Array<{ email: string | null }>;
-}) {
-  return premium.users?.[0]?.email;
+function getEmailFromextra(extra: { users: Array<{ email: string | null }> }) {
+  return extra.users?.[0]?.email;
 }

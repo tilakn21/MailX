@@ -18,8 +18,8 @@ import {
 } from "@/store/ai-categorize-sender-queue";
 import { SectionDescription } from "@/components/Typography";
 import { ButtonLoader } from "@/components/Loading";
-import { PremiumTooltip, usePremium } from "@/components/PremiumAlert";
-import { usePremiumModal } from "@/app/(app)/premium/PremiumModal";
+import { ExtraTooltip, useExtra } from "@/components/ExtraAlert";
+import { useExtraModal } from "@/components/ExtraModal";
 import { Toggle } from "@/components/Toggle";
 import { setAutoCategorizeAction } from "@/utils/actions/categorize";
 import { TooltipExplanation } from "@/components/TooltipExplanation";
@@ -32,8 +32,8 @@ export function Uncategorized({
   categories: CategoryWithRules[];
   autoCategorizeSenders: boolean;
 }) {
-  const { hasAiAccess } = usePremium();
-  const { PremiumModal, openModal: openPremiumModal } = usePremiumModal();
+  const { hasAiAccess } = useExtra();
+  const { ExtraModal, openModal: openExtraModal } = useExtraModal();
 
   const { data: senderAddresses, loadMore, isLoading, hasMore } = useSenders();
   const hasProcessingItems = useHasProcessingItems();
@@ -53,10 +53,7 @@ export function Uncategorized({
     <LoadingContent loading={!senderAddresses && isLoading}>
       <TopBar>
         <div className="flex gap-2">
-          <PremiumTooltip
-            showTooltip={!hasAiAccess}
-            openModal={openPremiumModal}
-          >
+          <ExtraTooltip showTooltip={!hasAiAccess} openModal={openExtraModal}>
             <Button
               loading={hasProcessingItems}
               disabled={!hasAiAccess}
@@ -72,7 +69,7 @@ export function Uncategorized({
               <SparklesIcon className="mr-2 size-4" />
               Categorize all with AI
             </Button>
-          </PremiumTooltip>
+          </ExtraTooltip>
 
           {hasProcessingItems && (
             <Button
@@ -128,7 +125,7 @@ export function Uncategorized({
           )
         )}
       </ClientOnly>
-      <PremiumModal />
+      <ExtraModal />
     </LoadingContent>
   );
 }

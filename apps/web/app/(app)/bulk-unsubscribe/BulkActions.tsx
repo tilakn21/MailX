@@ -12,9 +12,9 @@ import {
   useBulkArchive,
   useBulkDelete,
 } from "@/app/(app)/bulk-unsubscribe/hooks";
-import { PremiumTooltip, usePremium } from "@/components/PremiumAlert";
+import { ExtraTooltip, useExtra } from "@/components/ExtraAlert";
 import { Button } from "@/components/ui/button";
-import { usePremiumModal } from "@/app/(app)/premium/PremiumModal";
+import { useExtraModal } from "@/components/ExtraModal";
 
 export function BulkActions({
   selected,
@@ -24,14 +24,14 @@ export function BulkActions({
   mutate: () => Promise<any>;
 }) {
   const posthog = usePostHog();
-  const { hasUnsubscribeAccess, mutate: refetchPremium } = usePremium();
-  const { PremiumModal, openModal } = usePremiumModal();
+  const { hasUnsubscribeAccess, mutate: refetchextra } = useExtra();
+  const { ExtraModal, openModal } = useExtraModal();
 
   const { bulkUnsubscribeLoading, onBulkUnsubscribe } = useBulkUnsubscribe({
     hasUnsubscribeAccess,
     mutate,
     posthog,
-    refetchPremium,
+    refetchextra,
   });
 
   const { bulkApproveLoading, onBulkApprove } = useBulkApprove({
@@ -42,7 +42,7 @@ export function BulkActions({
   const { bulkAutoArchiveLoading, onBulkAutoArchive } = useBulkAutoArchive({
     hasUnsubscribeAccess,
     mutate,
-    refetchPremium,
+    refetchextra,
   });
 
   const { onBulkArchive } = useBulkArchive({ mutate, posthog });
@@ -59,7 +59,7 @@ export function BulkActions({
 
   return (
     <>
-      <PremiumTooltip showTooltip={!hasUnsubscribeAccess} openModal={openModal}>
+      <ExtraTooltip showTooltip={!hasUnsubscribeAccess} openModal={openModal}>
         <div className="flex items-center space-x-1.5">
           <div>
             <Button
@@ -122,8 +122,8 @@ export function BulkActions({
             </Button>
           </div>
         </div>
-      </PremiumTooltip>
-      <PremiumModal />
+      </ExtraTooltip>
+      <ExtraModal />
     </>
   );
 }

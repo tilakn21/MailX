@@ -14,21 +14,21 @@ import { FormSection, FormSectionLeft } from "@/components/Form";
 import { Input } from "@/components/Input";
 import { LoadingContent } from "@/components/LoadingContent";
 import {
-  saveMultiAccountPremiumBody,
-  type SaveMultiAccountPremiumBody,
+  saveMultiAccountextraBody,
+  type SaveMultiAccountextraBody,
 } from "@/app/api/user/settings/multi-account/validation";
 import {
-  claimPremiumAdminAction,
-  updateMultiAccountPremiumAction,
-} from "@/utils/actions/premium";
+  claimextraAdminAction,
+  updateMultiAccountextraAction,
+} from "@/utils/actions/extra";
 import type { MultiAccountEmailsResponse } from "@/app/api/user/settings/multi-account/route";
 import { AlertBasic, AlertWithButton } from "@/components/Alert";
-import { usePremium } from "@/components/PremiumAlert";
-import { pricingAdditonalEmail } from "@/app/(app)/premium/config";
-import { PremiumTier } from "@prisma/client";
+import { useExtra } from "@/components/ExtraAlert";
+import { ExtraFeaturesAdditonalEmail } from "@/utils/extra-features";
+import { extraTier } from "@prisma/client";
 import { env } from "@/env";
-import { getUserTier, isAdminForPremium } from "@/utils/premium";
-import { usePremiumModal } from "@/app/(app)/premium/PremiumModal";
+import { getUserTier, isAdminForExtra } from "@/utils/extra-features";
+import { useExtraModal } from "@/components/ExtraModal";
 import { handleActionResult } from "@/utils/server-action";
 
 export function MultiAccountSection() {
@@ -37,31 +37,28 @@ export function MultiAccountSection() {
     "/api/user/settings/multi-account",
   );
   const {
-    isPremium,
-    data: dataPremium,
-    isLoading: isLoadingPremium,
-    error: errorPremium,
-  } = usePremium();
+    isExtra,
+    data: dataextra,
+    isLoading: isLoadingextra,
+    error: errorextra,
+  } = useExtra();
 
-  const premiumTier = getUserTier(dataPremium?.premium);
+  const extraTier = getUserTier(dataextra?.extra);
 
-  const { openModal, PremiumModal } = usePremiumModal();
+  const { openModal, ExtraModal } = useExtraModal();
 
-  if (
-    isPremium &&
-    !isAdminForPremium(data?.admins || [], session?.user.id || "")
-  )
+  if (isExtra && !isAdminForExtra(data?.admins || [], session?.user.id || ""))
     return null;
 
   return (
     <FormSection id="manage-users">
       <FormSectionLeft
-        title="Share Premium"
-        description="Share premium with other email accounts. This does not give other accounts access to read your emails."
+        title="Share extra"
+        description="Share extra with other email accounts. This does not give other accounts access to read your emails."
       />
 
-      <LoadingContent loading={isLoadingPremium} error={errorPremium}>
-        {isPremium ? (
+      <LoadingContent loading={isLoadingextra} error={errorextra}>
+        {isExtra ? (
           <LoadingContent loading={isLoading} error={error}>
             {data && (
               <div>
@@ -69,7 +66,7 @@ export function MultiAccountSection() {
                   <div className="mb-4">
                     <Button
                       onClick={async () => {
-                        const result = await claimPremiumAdminAction();
+                        const result = await claimextraAdminAction();
                         handleActionResult(result, "Admin claimed!");
                         mutate();
                       }}
@@ -79,11 +76,11 @@ export function MultiAccountSection() {
                   </div>
                 )}
 
-                {premiumTier && (
+                {extraTier && (
                   <ExtraSeatsAlert
-                    premiumTier={premiumTier}
+                    extraTier={extraTier}
                     emailAccountsAccess={
-                      dataPremium?.premium?.emailAccountsAccess || 0
+                      dataextra?.extra?.emailAccountsAccess || 0
                     }
                     seatsUsed={data.users.length}
                   />
@@ -92,13 +89,11 @@ export function MultiAccountSection() {
                 <div className="mt-4">
                   <MultiAccountForm
                     emailAddresses={data.users as { email: string }[]}
-                    isLifetime={
-                      dataPremium?.premium?.tier === PremiumTier.LIFETIME
-                    }
+                    isLifetime={dataextra?.extra?.tier === extraTier.LIFETIME}
                     emailAccountsAccess={
-                      dataPremium?.premium?.emailAccountsAccess || 0
+                      dataextra?.extra?.emailAccountsAccess || 0
                     }
-                    pendingInvites={dataPremium?.premium?.pendingInvites || []}
+                    pendingInvites={dataextra?.extra?.pendingInvites || []}
                   />
                 </div>
               </div>
@@ -108,11 +103,11 @@ export function MultiAccountSection() {
           <div className="sm:col-span-2">
             <AlertWithButton
               title="Upgrade"
-              description="Upgrade to premium to share premium with other email addresses."
+              description="Upgrade to extra to share extra with other email addresses."
               icon={<CrownIcon className="h-4 w-4" />}
               button={<Button onClick={openModal}>Upgrade</Button>}
             />
-            <PremiumModal />
+            <ExtraModal />
           </div>
         )}
       </LoadingContent>
@@ -136,8 +131,8 @@ function MultiAccountForm({
     handleSubmit,
     formState: { errors, isSubmitting },
     control,
-  } = useForm<SaveMultiAccountPremiumBody>({
-    resolver: zodResolver(saveMultiAccountPremiumBody),
+  } = useForm<SaveMultiAccountextraBody>({
+    resolver: zodResolver(saveMultiAccountextraBody),
     defaultValues: {
       emailAddresses: emailAddresses?.length
         ? [...emailAddresses, ...pendingInvites.map((email) => ({ email }))]
@@ -154,13 +149,13 @@ function MultiAccountForm({
   const extraSeats = fields.length - emailAccountsAccess - 1;
   const needsToPurchaseMoreSeats = isLifetime && extraSeats > 0;
 
-  const onSubmit: SubmitHandler<SaveMultiAccountPremiumBody> = useCallback(
+  const onSubmit: SubmitHandler<SaveMultiAccountextraBody> = useCallback(
     async (data) => {
       if (!data.emailAddresses) return;
       if (needsToPurchaseMoreSeats) return;
 
       const emails = data.emailAddresses.map((e) => e.email);
-      const result = await updateMultiAccountPremiumAction(emails);
+      const result = await updateMultiAccountextraAction(emails);
 
       handleActionResult(result, "Users updated!");
     },
@@ -216,11 +211,11 @@ function MultiAccountForm({
 
 function ExtraSeatsAlert({
   emailAccountsAccess,
-  premiumTier,
+  extraTier,
   seatsUsed,
 }: {
   emailAccountsAccess: number;
-  premiumTier: PremiumTier;
+  extraTier: extraTier;
   seatsUsed: number;
 }) {
   if (emailAccountsAccess > seatsUsed) {
@@ -237,9 +232,9 @@ function ExtraSeatsAlert({
     <AlertBasic
       title="Extra email price"
       description={`You are on the ${capitalCase(
-        premiumTier,
+        extraTier,
       )} plan. You will be billed $${
-        pricingAdditonalEmail[premiumTier]
+        ExtraFeaturesAdditonalEmail[extraTier]
       } for each extra email you add to your account.`}
       icon={<CrownIcon className="h-4 w-4" />}
     />

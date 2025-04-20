@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { bulkCategorizeSendersAction } from "@/utils/actions/categorize";
 import { handleActionCall } from "@/utils/server-action";
 import { isActionError } from "@/utils/error";
-import { PremiumTooltip, usePremium } from "@/components/PremiumAlert";
-import { usePremiumModal } from "@/app/(app)/premium/PremiumModal";
+import { ExtraTooltip, useExtra } from "@/components/ExtraAlert";
+import { useExtraModal } from "@/components/ExtraModal";
 import type { ButtonProps } from "@/components/ui/button";
 import { useCategorizeProgress } from "@/app/(app)/smart-categories/CategorizeProgress";
 import { Tooltip } from "@/components/Tooltip";
@@ -19,8 +19,8 @@ export function CategorizeWithAiButton({
   buttonProps?: ButtonProps;
 }) {
   const [isCategorizing, setIsCategorizing] = useState(false);
-  const { hasAiAccess } = usePremium();
-  const { PremiumModal, openModal: openPremiumModal } = usePremiumModal();
+  const { hasAiAccess } = useExtra();
+  const { ExtraModal, openModal: openExtraModal } = useExtraModal();
 
   const { setIsBulkCategorizing } = useCategorizeProgress();
 
@@ -28,7 +28,7 @@ export function CategorizeWithAiButton({
     <>
       <CategorizeWithAiButtonTooltip
         hasAiAccess={hasAiAccess}
-        openPremiumModal={openPremiumModal}
+        openExtraModal={openExtraModal}
       >
         <Button
           type="button"
@@ -77,7 +77,7 @@ export function CategorizeWithAiButton({
           )}
         </Button>
       </CategorizeWithAiButtonTooltip>
-      <PremiumModal />
+      <ExtraModal />
     </>
   );
 }
@@ -85,11 +85,11 @@ export function CategorizeWithAiButton({
 function CategorizeWithAiButtonTooltip({
   children,
   hasAiAccess,
-  openPremiumModal,
+  openExtraModal,
 }: {
   children: React.ReactElement<any>;
   hasAiAccess: boolean;
-  openPremiumModal: () => void;
+  openExtraModal: () => void;
 }) {
   if (hasAiAccess) {
     return (
@@ -100,8 +100,8 @@ function CategorizeWithAiButtonTooltip({
   }
 
   return (
-    <PremiumTooltip showTooltip={!hasAiAccess} openModal={openPremiumModal}>
+    <ExtraTooltip showTooltip={!hasAiAccess} openModal={openExtraModal}>
       {children}
-    </PremiumTooltip>
+    </ExtraTooltip>
   );
 }

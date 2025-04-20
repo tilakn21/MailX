@@ -136,7 +136,7 @@ describe.runIf(isAiTest)("aiPromptToRules", () => {
 
     const promptFile = `
       * Forward urgent emails about system outages to urgent@company.com and label as "Urgent"
-      * When someone asks for pricing, forward to sales@company.com and label as "Sales Lead"
+      * When someone asks for ExtraFeatures, forward to sales@company.com and label as "Sales Lead"
       * Forward emails from VIP clients (from @bigclient.com) to vip-support@company.com
     `.trim();
 
@@ -170,7 +170,7 @@ describe.runIf(isAiTest)("aiPromptToRules", () => {
     expect(result[1]).toMatchObject({
       name: expect.any(String),
       condition: {
-        aiInstructions: expect.stringMatching(/pricing|sales/i),
+        aiInstructions: expect.stringMatching(/ExtraFeatures|sales/i),
       },
       actions: [
         {
@@ -294,11 +294,11 @@ describe.runIf(isAiTest)("aiPromptToRules", () => {
     };
 
     const promptFile = `
-      When someone asks about pricing, reply with:
+      When someone asks about ExtraFeatures, reply with:
       """
       Hi [firstName],
 
-      Thank you for your interest in our pricing. Our plans start at $10/month.
+      Thank you for your interest in our ExtraFeatures. Our plans start at $10/month.
       
       Best regards,
       Sales Team
@@ -315,7 +315,7 @@ describe.runIf(isAiTest)("aiPromptToRules", () => {
     expect(result[0]).toMatchObject({
       name: expect.any(String),
       condition: {
-        aiInstructions: expect.stringMatching(/pricing|price/i),
+        aiInstructions: expect.stringMatching(/ExtraFeatures|price/i),
       },
       actions: [
         {

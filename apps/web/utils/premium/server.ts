@@ -1,11 +1,11 @@
 import prisma from "@/utils/prisma";
-import { FeatureAccess, PremiumTier } from "@prisma/client";
+import { FeatureAccess, extraTier } from "@prisma/client";
 
 const TEN_YEARS = 10 * 365 * 24 * 60 * 60 * 1000;
 
-export async function upgradeToPremium(options: {
+export async function upgradeToextra(options: {
   userId: string;
-  tier: PremiumTier;
+  tier: extraTier;
   lemonSqueezyRenewsAt: Date | null;
   lemonSqueezySubscriptionId: number | null;
   lemonSqueezySubscriptionItemId: number | null;
@@ -20,13 +20,13 @@ export async function upgradeToPremium(options: {
   const { userId, ...rest } = options;
 
   const lemonSqueezyRenewsAt =
-    options.tier === PremiumTier.LIFETIME
+    options.tier === extraTier.LIFETIME
       ? new Date(Date.now() + TEN_YEARS)
       : options.lemonSqueezyRenewsAt;
 
   const user = await prisma.user.findUnique({
     where: { id: options.userId },
-    select: { premiumId: true },
+    select: { extraId: true },
   });
 
   if (!user) throw new Error(`User not found for id ${options.userId}`);
@@ -37,14 +37,14 @@ export async function upgradeToPremium(options: {
     ...getTierAccess(options.tier),
   };
 
-  if (user.premiumId) {
-    return await prisma.premium.update({
-      where: { id: user.premiumId },
+  if (user.extraId) {
+    return await prisma.extra.update({
+      where: { id: user.extraId },
       data,
       select: { users: { select: { email: true } } },
     });
   }
-  return await prisma.premium.create({
+  return await prisma.extra.create({
     data: {
       users: { connect: { id: options.userId } },
       admins: { connect: { id: options.userId } },
@@ -54,12 +54,12 @@ export async function upgradeToPremium(options: {
   });
 }
 
-export async function extendPremium(options: {
-  premiumId: string;
+export async function extendextra(options: {
+  extraId: string;
   lemonSqueezyRenewsAt: Date;
 }) {
-  return await prisma.premium.update({
-    where: { id: options.premiumId },
+  return await prisma.extra.update({
+    where: { id: options.extraId },
     data: {
       lemonSqueezyRenewsAt: options.lemonSqueezyRenewsAt,
     },
@@ -71,30 +71,30 @@ export async function extendPremium(options: {
   });
 }
 
-export async function cancelPremium({
-  premiumId,
+export async function cancelextra({
+  extraId,
   lemonSqueezyEndsAt,
   variantId,
   expired,
 }: {
-  premiumId: string;
+  extraId: string;
   lemonSqueezyEndsAt: Date;
   variantId?: number;
   expired: boolean;
 }) {
   if (variantId) {
-    // Check if the premium exists for the given variant
+    // Check if the extra exists for the given variant
     // If the user changed plans we won't find it in the database
     // And that's okay because the user is on a different plan
-    const premium = await prisma.premium.findUnique({
-      where: { id: premiumId, lemonSqueezyVariantId: variantId },
+    const extra = await prisma.extra.findUnique({
+      where: { id: extraId, lemonSqueezyVariantId: variantId },
       select: { id: true },
     });
-    if (!premium) return null;
+    if (!extra) return null;
   }
 
-  return await prisma.premium.update({
-    where: { id: premiumId },
+  return await prisma.extra.update({
+    where: { id: extraId },
     data: {
       lemonSqueezyRenewsAt: lemonSqueezyEndsAt,
       ...(expired
@@ -114,14 +114,14 @@ export async function cancelPremium({
 }
 
 export async function editEmailAccountsAccess(options: {
-  premiumId: string;
+  extraId: string;
   count: number;
 }) {
   const { count } = options;
   if (!count) return;
 
-  return await prisma.premium.update({
-    where: { id: options.premiumId },
+  return await prisma.extra.update({
+    where: { id: options.extraId },
     data: {
       emailAccountsAccess:
         count > 0 ? { increment: count } : { decrement: count },
@@ -134,32 +134,32 @@ export async function editEmailAccountsAccess(options: {
   });
 }
 
-function getTierAccess(tier: PremiumTier) {
+function getTierAccess(tier: extraTier) {
   switch (tier) {
-    case PremiumTier.BASIC_MONTHLY:
-    case PremiumTier.BASIC_ANNUALLY:
+    case extraTier.BASIC_MONTHLY:
+    case extraTier.BASIC_ANNUALLY:
       return {
         bulkUnsubscribeAccess: FeatureAccess.UNLOCKED,
         aiAutomationAccess: FeatureAccess.LOCKED,
         coldEmailBlockerAccess: FeatureAccess.LOCKED,
       };
-    case PremiumTier.PRO_MONTHLY:
-    case PremiumTier.PRO_ANNUALLY:
+    case extraTier.PRO_MONTHLY:
+    case extraTier.PRO_ANNUALLY:
       return {
         bulkUnsubscribeAccess: FeatureAccess.UNLOCKED,
         aiAutomationAccess: FeatureAccess.UNLOCKED_WITH_API_KEY,
         coldEmailBlockerAccess: FeatureAccess.UNLOCKED_WITH_API_KEY,
       };
-    case PremiumTier.BUSINESS_MONTHLY:
-    case PremiumTier.BUSINESS_ANNUALLY:
-    case PremiumTier.COPILOT_MONTHLY:
-    case PremiumTier.LIFETIME:
+    case extraTier.BUSINESS_MONTHLY:
+    case extraTier.BUSINESS_ANNUALLY:
+    case extraTier.COPILOT_MONTHLY:
+    case extraTier.LIFETIME:
       return {
         bulkUnsubscribeAccess: FeatureAccess.UNLOCKED,
         aiAutomationAccess: FeatureAccess.UNLOCKED,
         coldEmailBlockerAccess: FeatureAccess.UNLOCKED,
       };
     default:
-      throw new Error(`Unknown premium tier: ${tier}`);
+      throw new Error(`Unknown extra tier: ${tier}`);
   }
 }

@@ -5,7 +5,7 @@ import { type SubmitHandler, useForm } from "react-hook-form";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { TopSection } from "@/components/TopSection";
-import { activateLicenseKeyAction } from "@/utils/actions/premium";
+import { activateLicenseKeyAction } from "@/utils/actions/extra";
 import { AlertBasic } from "@/components/Alert";
 import { handleActionResult } from "@/utils/server-action";
 import { useUser } from "@/hooks/useUser";
@@ -25,7 +25,7 @@ export default function LicensePage(props: {
       <TopSection title="Activate your license" />
 
       <div className="content-container max-w-2xl py-6">
-        {data?.premium?.lemonLicenseKey && (
+        {data?.extra?.lemonLicenseKey && (
           <AlertBasic
             variant="success"
             title="Your license is activated"

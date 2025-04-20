@@ -50,7 +50,7 @@ const costs: Record<
     output: number;
   }
 > = {
-  // https://openai.com/pricing
+  // https://openai.com/ExtraFeatures
   "gpt-3.5-turbo-0125": {
     input: 0.5 / 1_000_000,
     output: 1.5 / 1_000_000,
@@ -67,7 +67,7 @@ const costs: Record<
     input: 5 / 1_000_000,
     output: 15 / 1_000_000,
   },
-  // https://www.anthropic.com/pricing#anthropic-api
+  // https://www.anthropic.com/ExtraFeatures#anthropic-api
   "claude-3-5-sonnet-20240620": {
     input: 3 / 1_000_000,
     output: 15 / 1_000_000,
@@ -84,7 +84,7 @@ const costs: Record<
     input: 3 / 1_000_000,
     output: 15 / 1_000_000,
   },
-  // https://aws.amazon.com/bedrock/pricing/
+  // https://aws.amazon.com/bedrock/ExtraFeatures/
   "anthropic.claude-3-5-sonnet-20240620-v1:0": {
     input: 3 / 1_000_000,
     output: 15 / 1_000_000,
@@ -109,7 +109,7 @@ const costs: Record<
     input: 0.8 / 1_000_000,
     output: 4 / 1_000_000,
   },
-  // https://ai.google.dev/pricing
+  // https://ai.google.dev/ExtraFeatures
   "gemini-1.5-pro-latest": {
     input: 1.25 / 1_000_000,
     output: 5 / 1_000_000,
@@ -138,7 +138,7 @@ const costs: Record<
     input: 0.2 / 1_000_000,
     output: 0.85 / 1_000_000,
   },
-  // https://groq.com/pricing
+  // https://groq.com/ExtraFeatures
   "llama-3.3-70b-versatile": {
     input: 0.59 / 1_000_000,
     output: 0.79 / 1_000_000,

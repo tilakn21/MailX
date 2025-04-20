@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import type { PostHog } from "posthog-js/react";
 import { onAutoArchive, onDeleteFilter } from "@/utils/actions/client";
 import { setNewsletterStatusAction } from "@/utils/actions/unsubscriber";
-import { decrementUnsubscribeCreditAction } from "@/utils/actions/premium";
+import { decrementUnsubscribeCreditAction } from "@/utils/actions/extra";
 import { NewsletterStatus } from "@prisma/client";
 import { cleanUnsubscribeLink } from "@/utils/parse/parseHtml.client";
 import { captureException } from "@/utils/error";
@@ -18,7 +18,7 @@ import { isDefined } from "@/utils/types";
 async function unsubscribeAndArchive(
   newsletterEmail: string,
   mutate: () => Promise<void>,
-  refetchPremium: () => Promise<any>,
+  refetchextra: () => Promise<any>,
 ) {
   await setNewsletterStatusAction({
     newsletterEmail,
@@ -26,7 +26,7 @@ async function unsubscribeAndArchive(
   });
   await mutate();
   await decrementUnsubscribeCreditAction();
-  await refetchPremium();
+  await refetchextra();
   await addToArchiveSenderQueue(newsletterEmail);
 }
 
@@ -35,13 +35,13 @@ export function useUnsubscribe<T extends Row>({
   hasUnsubscribeAccess,
   mutate,
   posthog,
-  refetchPremium,
+  refetchextra,
 }: {
   item: T;
   hasUnsubscribeAccess: boolean;
   mutate: () => Promise<void>;
   posthog: PostHog;
-  refetchPremium: () => Promise<any>;
+  refetchextra: () => Promise<any>;
 }) {
   const [unsubscribeLoading, setUnsubscribeLoading] = React.useState(false);
 
@@ -60,7 +60,7 @@ export function useUnsubscribe<T extends Row>({
         });
         await mutate();
       } else {
-        await unsubscribeAndArchive(item.name, mutate, refetchPremium);
+        await unsubscribeAndArchive(item.name, mutate, refetchextra);
       }
     } catch (error) {
       captureException(error);
@@ -73,7 +73,7 @@ export function useUnsubscribe<T extends Row>({
     item.name,
     item.status,
     mutate,
-    refetchPremium,
+    refetchextra,
     posthog,
   ]);
 
@@ -91,12 +91,12 @@ export function useBulkUnsubscribe<T extends Row>({
   hasUnsubscribeAccess,
   mutate,
   posthog,
-  refetchPremium,
+  refetchextra,
 }: {
   hasUnsubscribeAccess: boolean;
   mutate: () => Promise<any>;
   posthog: PostHog;
-  refetchPremium: () => Promise<any>;
+  refetchextra: () => Promise<any>;
 }) {
   const [bulkUnsubscribeLoading, setBulkUnsubscribeLoading] =
     React.useState(false);
@@ -112,7 +112,7 @@ export function useBulkUnsubscribe<T extends Row>({
 
         for (const item of items) {
           try {
-            await unsubscribeAndArchive(item.name, mutate, refetchPremium);
+            await unsubscribeAndArchive(item.name, mutate, refetchextra);
           } catch (error) {
             captureException(error);
             console.error(error);
@@ -125,7 +125,7 @@ export function useBulkUnsubscribe<T extends Row>({
 
       setBulkUnsubscribeLoading(false);
     },
-    [hasUnsubscribeAccess, mutate, posthog, refetchPremium],
+    [hasUnsubscribeAccess, mutate, posthog, refetchextra],
   );
 
   return {
@@ -138,7 +138,7 @@ async function autoArchive(
   name: string,
   labelId: string | undefined,
   mutate: () => Promise<void>,
-  refetchPremium: () => Promise<any>,
+  refetchextra: () => Promise<any>,
 ) {
   await onAutoArchive(name, labelId);
   await setNewsletterStatusAction({
@@ -147,7 +147,7 @@ async function autoArchive(
   });
   await mutate();
   await decrementUnsubscribeCreditAction();
-  await refetchPremium();
+  await refetchextra();
   await addToArchiveSenderQueue(name, labelId);
 }
 
@@ -156,13 +156,13 @@ export function useAutoArchive<T extends Row>({
   hasUnsubscribeAccess,
   mutate,
   posthog,
-  refetchPremium,
+  refetchextra,
 }: {
   item: T;
   hasUnsubscribeAccess: boolean;
   mutate: () => Promise<any>;
   posthog: PostHog;
-  refetchPremium: () => Promise<any>;
+  refetchextra: () => Promise<any>;
 }) {
   const [autoArchiveLoading, setAutoArchiveLoading] = React.useState(false);
 
@@ -171,12 +171,12 @@ export function useAutoArchive<T extends Row>({
 
     setAutoArchiveLoading(true);
 
-    await autoArchive(item.name, undefined, mutate, refetchPremium);
+    await autoArchive(item.name, undefined, mutate, refetchextra);
 
     posthog.capture("Clicked Auto Archive");
 
     setAutoArchiveLoading(false);
-  }, [item.name, mutate, refetchPremium, hasUnsubscribeAccess, posthog]);
+  }, [item.name, mutate, refetchextra, hasUnsubscribeAccess, posthog]);
 
   const onDisableAutoArchive = useCallback(async () => {
     setAutoArchiveLoading(true);
@@ -199,11 +199,11 @@ export function useAutoArchive<T extends Row>({
 
       setAutoArchiveLoading(true);
 
-      await autoArchive(item.name, labelId, mutate, refetchPremium);
+      await autoArchive(item.name, labelId, mutate, refetchextra);
 
       setAutoArchiveLoading(false);
     },
-    [item.name, mutate, refetchPremium, hasUnsubscribeAccess],
+    [item.name, mutate, refetchextra, hasUnsubscribeAccess],
   );
 
   return {
@@ -217,11 +217,11 @@ export function useAutoArchive<T extends Row>({
 export function useBulkAutoArchive<T extends Row>({
   hasUnsubscribeAccess,
   mutate,
-  refetchPremium,
+  refetchextra,
 }: {
   hasUnsubscribeAccess: boolean;
   mutate: () => Promise<any>;
-  refetchPremium: () => Promise<any>;
+  refetchextra: () => Promise<any>;
 }) {
   const [bulkAutoArchiveLoading, setBulkAutoArchiveLoading] =
     React.useState(false);
@@ -233,12 +233,12 @@ export function useBulkAutoArchive<T extends Row>({
       setBulkAutoArchiveLoading(true);
 
       for (const item of items) {
-        await autoArchive(item.name, undefined, mutate, refetchPremium);
+        await autoArchive(item.name, undefined, mutate, refetchextra);
       }
 
       setBulkAutoArchiveLoading(false);
     },
-    [hasUnsubscribeAccess, mutate, refetchPremium],
+    [hasUnsubscribeAccess, mutate, refetchextra],
   );
 
   return {
@@ -262,7 +262,7 @@ export function useApproveButton<T extends Row>({
     hasUnsubscribeAccess: true,
     mutate,
     posthog,
-    refetchPremium: () => Promise.resolve(),
+    refetchextra: () => Promise.resolve(),
   });
 
   const onApprove = async () => {
@@ -468,7 +468,7 @@ export function useBulkUnsubscribeShortcuts<T extends Row>({
   selectedRow,
   onOpenNewsletter,
   setSelectedRow,
-  refetchPremium,
+  refetchextra,
   hasUnsubscribeAccess,
   mutate,
 }: {
@@ -476,7 +476,7 @@ export function useBulkUnsubscribeShortcuts<T extends Row>({
   selectedRow?: T;
   setSelectedRow: (row: T) => void;
   onOpenNewsletter: (row: T) => void;
-  refetchPremium: () => Promise<any>;
+  refetchextra: () => Promise<any>;
   hasUnsubscribeAccess: boolean;
   mutate: () => Promise<any>;
 }) {
@@ -520,7 +520,7 @@ export function useBulkUnsubscribeShortcuts<T extends Row>({
         });
         await mutate();
         await decrementUnsubscribeCreditAction();
-        await refetchPremium();
+        await refetchextra();
         return;
       }
       if (e.key === "u") {
@@ -534,7 +534,7 @@ export function useBulkUnsubscribeShortcuts<T extends Row>({
         });
         await mutate();
         await decrementUnsubscribeCreditAction();
-        await refetchPremium();
+        await refetchextra();
         return;
       }
       if (e.key === "a") {
@@ -555,7 +555,7 @@ export function useBulkUnsubscribeShortcuts<T extends Row>({
     newsletters,
     selectedRow,
     hasUnsubscribeAccess,
-    refetchPremium,
+    refetchextra,
     setSelectedRow,
     onOpenNewsletter,
   ]);

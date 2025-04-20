@@ -137,7 +137,7 @@ function UnsubscribeRow({
       item: row,
       hasUnsubscribeAccess: true,
       mutate,
-      refetchPremium: () => Promise.resolve(),
+      refetchextra: () => Promise.resolve(),
       posthog,
     },
   );

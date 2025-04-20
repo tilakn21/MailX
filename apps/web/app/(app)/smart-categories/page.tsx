@@ -22,7 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Uncategorized } from "@/app/(app)/smart-categories/Uncategorized";
 import { PermissionsCheck } from "@/app/(app)/PermissionsCheck";
 import { ArchiveProgress } from "@/app/(app)/bulk-unsubscribe/ArchiveProgress";
-import { PremiumAlertWithData } from "@/components/PremiumAlert";
+import { ExtraAlertWithData } from "@/components/ExtraAlert";
 import { Button } from "@/components/ui/button";
 import { CategorizeSendersProgress } from "@/app/(app)/smart-categories/CategorizeProgress";
 import { getCategorizationProgress } from "@/utils/redis/categorization-progress";
@@ -64,7 +64,7 @@ export default async function CategoriesPage() {
         <CategorizeSendersProgress refresh={!!progress} />
       </ClientOnly>
 
-      <PremiumAlertWithData className="mx-2 mt-2 sm:mx-4" />
+      <ExtraAlertWithData className="mx-2 mt-2 sm:mx-4" />
 
       <Suspense>
         <Tabs defaultValue="categories">

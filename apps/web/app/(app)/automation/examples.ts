@@ -65,7 +65,7 @@ Hey NAME,
 
 SENTENCE RELATED TO THEIR INQUIRY
 
-I've attached my media kit and pricing.
+I've attached my media kit and ExtraFeatures.
 ---
 
 * Label emails about affiliate programs as "Affiliate" and archive them.
@@ -125,12 +125,12 @@ I've attached my media kit and pricing.
 * Label emails about deal negotiations as "Deal Discussion".
 * Label emails from sales tools as "Sales Tool" and archive them.
 * Label emails about sales opportunities as "Sales Opportunity".
-* If someone asks for pricing, draft a reply with our pricing page link: https://company.com/pricing.
+* If someone asks for ExtraFeatures, draft a reply with our ExtraFeatures page link: https://company.com/ExtraFeatures.
 * Label emails containing signed contracts as "Signed Contract" and forward to legal@company.com.
 * If someone requests a demo, draft a reply with my calendar link: https://cal.com/example
 * If someone asks about product features, draft a reply with relevant feature documentation links.
 * If someone reports implementation issues, label as "Support Need" and forward to support@company.com
-* If someone asks about enterprise pricing, draft a reply asking about their company size and requirements.
+* If someone asks about enterprise ExtraFeatures, draft a reply asking about their company size and requirements.
 * If a customer mentions churn risk, label as "Churn Risk" and draft an urgent notification to the customer success team.`,
   },
   marketing: {

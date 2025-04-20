@@ -1,26 +1,24 @@
 import { z } from "zod";
-import { PremiumTier } from "@prisma/client";
+import { extraTier } from "@prisma/client";
 
-export const changePremiumStatusSchema = z.object({
+export const changeextraStatusSchema = z.object({
   email: z.string().email(),
   lemonSqueezyCustomerId: z.coerce.number().optional(),
   emailAccountsAccess: z.coerce.number().optional(),
   period: z.enum([
-    PremiumTier.BASIC_MONTHLY,
-    PremiumTier.BASIC_ANNUALLY,
-    PremiumTier.PRO_MONTHLY,
-    PremiumTier.PRO_ANNUALLY,
-    PremiumTier.BUSINESS_MONTHLY,
-    PremiumTier.BUSINESS_ANNUALLY,
-    PremiumTier.COPILOT_MONTHLY,
-    PremiumTier.LIFETIME,
+    extraTier.BASIC_MONTHLY,
+    extraTier.BASIC_ANNUALLY,
+    extraTier.PRO_MONTHLY,
+    extraTier.PRO_ANNUALLY,
+    extraTier.BUSINESS_MONTHLY,
+    extraTier.BUSINESS_ANNUALLY,
+    extraTier.COPILOT_MONTHLY,
+    extraTier.LIFETIME,
   ]),
   count: z.coerce.number().optional(),
   upgrade: z.boolean(),
 });
-export type ChangePremiumStatusOptions = z.infer<
-  typeof changePremiumStatusSchema
->;
+export type ChangeextraStatusOptions = z.infer<typeof changeextraStatusSchema>;
 
 export const adminProcessHistorySchema = z.object({
   email: z.string().email(),

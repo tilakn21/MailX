@@ -35,10 +35,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  PremiumTooltip,
-  PremiumTooltipContent,
-} from "@/components/PremiumAlert";
+import { ExtraTooltip, ExtraTooltipContent } from "@/components/ExtraAlert";
 import { GroupItemType, NewsletterStatus } from "@prisma/client";
 import type { GroupsResponse } from "@/app/api/user/group/route";
 import { addGroupItemAction } from "@/utils/actions/group";
@@ -61,42 +58,42 @@ export function ActionCell<T extends Row>({
   item,
   hasUnsubscribeAccess,
   mutate,
-  refetchPremium,
+  refetchextra,
   onOpenNewsletter,
   labels,
-  openPremiumModal,
+  openExtraModal,
   userEmail,
 }: {
   item: T;
   hasUnsubscribeAccess: boolean;
   mutate: () => Promise<void>;
-  refetchPremium: () => Promise<any>;
+  refetchextra: () => Promise<any>;
   onOpenNewsletter: (row: T) => void;
   selected: boolean;
   labels: UserLabel[];
-  openPremiumModal: () => void;
+  openExtraModal: () => void;
   userEmail: string;
 }) {
   const posthog = usePostHog();
 
   return (
     <>
-      <PremiumTooltip
+      <ExtraTooltip
         showTooltip={!hasUnsubscribeAccess}
-        openModal={openPremiumModal}
+        openModal={openExtraModal}
       >
         <UnsubscribeButton
           item={item}
           hasUnsubscribeAccess={hasUnsubscribeAccess}
           mutate={mutate}
           posthog={posthog}
-          refetchPremium={refetchPremium}
+          refetchextra={refetchextra}
         />
-      </PremiumTooltip>
+      </ExtraTooltip>
       <Tooltip
         contentComponent={
           !hasUnsubscribeAccess ? (
-            <PremiumTooltipContent openModal={openPremiumModal} />
+            <ExtraTooltipContent openModal={openExtraModal} />
           ) : undefined
         }
         content={
@@ -110,14 +107,14 @@ export function ActionCell<T extends Row>({
           hasUnsubscribeAccess={hasUnsubscribeAccess}
           mutate={mutate}
           posthog={posthog}
-          refetchPremium={refetchPremium}
+          refetchextra={refetchextra}
           labels={labels}
         />
       </Tooltip>
       <Tooltip
         contentComponent={
           !hasUnsubscribeAccess ? (
-            <PremiumTooltipContent openModal={openPremiumModal} />
+            <ExtraTooltipContent openModal={openExtraModal} />
           ) : undefined
         }
         content={
@@ -149,12 +146,12 @@ function UnsubscribeButton<T extends Row>({
   hasUnsubscribeAccess,
   mutate,
   posthog,
-  refetchPremium,
+  refetchextra,
 }: {
   item: T;
   hasUnsubscribeAccess: boolean;
   mutate: () => Promise<void>;
-  refetchPremium: () => Promise<any>;
+  refetchextra: () => Promise<any>;
   posthog: PostHog;
 }) {
   const { unsubscribeLoading, onUnsubscribe, unsubscribeLink } = useUnsubscribe(
@@ -163,7 +160,7 @@ function UnsubscribeButton<T extends Row>({
       hasUnsubscribeAccess,
       mutate,
       posthog,
-      refetchPremium,
+      refetchextra,
     },
   );
 
@@ -202,14 +199,14 @@ function AutoArchiveButton<T extends Row>({
   hasUnsubscribeAccess,
   mutate,
   posthog,
-  refetchPremium,
+  refetchextra,
   labels,
 }: {
   item: T;
   hasUnsubscribeAccess: boolean;
   mutate: () => Promise<void>;
   posthog: PostHog;
-  refetchPremium: () => Promise<any>;
+  refetchextra: () => Promise<any>;
   labels: UserLabel[];
 }) {
   const {
@@ -222,7 +219,7 @@ function AutoArchiveButton<T extends Row>({
     hasUnsubscribeAccess,
     mutate,
     posthog,
-    refetchPremium,
+    refetchextra,
   });
 
   return (

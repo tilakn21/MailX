@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Hero } from "@/app/(landing)/home/Hero";
 import { Testimonials } from "@/app/(landing)/home/Testimonials";
-import { Pricing } from "@/app/(app)/premium/Pricing";
+import { ExtraFeatures } from "@/components/FreeFeatures";
 import { FAQs } from "@/app/(landing)/home/FAQs";
 import { CTA } from "@/app/(landing)/home/CTA";
 import { FeaturesAiAssistant } from "@/app/(landing)/home/Features";
@@ -27,7 +27,7 @@ export default function AiAutomation() {
       <FeaturesAiAssistant />
       <Suspense>
         <div className="pb-32">
-          <Pricing />
+          <ExtraFeatures />
         </div>
       </Suspense>
       <FAQs />

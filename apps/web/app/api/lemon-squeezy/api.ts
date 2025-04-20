@@ -47,11 +47,11 @@ export async function activateLemonLicenseKey(
   return activateLicense(licenseKey, name);
 }
 
-export async function switchPremiumPlan(
+export async function switchextraPlan(
   subscriptionId: number,
   variantId: number,
 ) {
   setUpLemon();
-  logger.info("Switching premium plan", { subscriptionId, variantId });
+  logger.info("Switching extra plan", { subscriptionId, variantId });
   return updateSubscription(subscriptionId, { variantId });
 }

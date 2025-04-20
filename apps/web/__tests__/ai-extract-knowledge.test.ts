@@ -96,7 +96,7 @@ describe.runIf(isAiTest)("aiExtractRelevantKnowledge", () => {
     vi.clearAllMocks();
   });
 
-  test("extracts Instagram pricing knowledge when asked about Instagram sponsorship", async () => {
+  test("extracts Instagram ExtraFeatures knowledge when asked about Instagram sponsorship", async () => {
     const emailContent =
       "Hi! I'm interested in doing an Instagram sponsorship with you. What are your rates?";
 
@@ -115,7 +115,7 @@ describe.runIf(isAiTest)("aiExtractRelevantKnowledge", () => {
     );
   }, 15_000);
 
-  test("extracts YouTube pricing knowledge when asked about video sponsorship", async () => {
+  test("extracts YouTube ExtraFeatures knowledge when asked about video sponsorship", async () => {
     const emailContent =
       "We'd love to sponsor a video on your YouTube channel. Could you share your rates for video integrations?";
 
@@ -134,7 +134,7 @@ describe.runIf(isAiTest)("aiExtractRelevantKnowledge", () => {
     );
   }, 15_000);
 
-  test("extracts TikTok pricing knowledge when asked about TikTok collaboration", async () => {
+  test("extracts TikTok ExtraFeatures knowledge when asked about TikTok collaboration", async () => {
     const emailContent =
       "Hey! Looking to collaborate on TikTok. What's your rate for sponsored content?";
 
